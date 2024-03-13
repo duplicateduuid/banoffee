@@ -22,7 +22,7 @@ func main() {
 	}
 
 	router := gin.Default()
-	router.Use(AuthMiddleware(db, rdb))
+	router.Group("/").Use(AuthMiddleware(db, rdb))
 
 	router.GET("/health-check", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })
 

@@ -17,21 +17,24 @@ func AuthMiddleware(db *sqlx.DB, rdb *redis.Client) gin.HandlerFunc {
 		session_id, err := ctx.Cookie("session_id")
 
 		if err != nil {
-			ctx.Next()
+			ctx.JSON(401, gin.H{"message": "Unauthorized"})
+			ctx.Abort()
 			return
 		}
 
 		user_id, err := rdb.Get(ctx, session_id).Result()
 
 		if err != nil {
-			ctx.Next()
+			ctx.JSON(401, gin.H{"message": "Unauthorized"})
+			ctx.Abort()
 			return
 		}
 
 		user_auth_info := UserAuthInfo{}
 		database_error := db.Get(&user_auth_info, `SELECT u.id, u.email FROM "user" u WHERE u.id=$1`, user_id)
 		if database_error != nil {
-			ctx.Next()
+			ctx.JSON(401, gin.H{"message": "Unauthorized"})
+			ctx.Abort()
 			return
 		}
 
