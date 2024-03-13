@@ -29,7 +29,7 @@ func AuthMiddleware(db *sqlx.DB, rdb *redis.Client) gin.HandlerFunc {
 		}
 
 		user_auth_info := UserAuthInfo{}
-		database_error := db.Get(&user_auth_info, `SELECT u.id, u.email, u.name FROM "user" u WHERE u.id=$1`, user_id)
+		database_error := db.Get(&user_auth_info, `SELECT u.id, u.email FROM "user" u WHERE u.id=$1`, user_id)
 		if database_error != nil {
 			ctx.Next()
 			return
