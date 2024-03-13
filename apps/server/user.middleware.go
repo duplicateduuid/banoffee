@@ -14,7 +14,7 @@ type UserAuthInfo struct {
 
 func AuthMiddleware(db *sqlx.DB, rdb *redis.Client) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		session_id, err := ctx.Cookie("session_id")
+		sessionId, err := ctx.Cookie("sessionId")
 
 		if err != nil {
 			ctx.JSON(401, gin.H{"message": "Unauthorized"})
@@ -22,7 +22,7 @@ func AuthMiddleware(db *sqlx.DB, rdb *redis.Client) gin.HandlerFunc {
 			return
 		}
 
-		user_id, err := rdb.Get(ctx, session_id).Result()
+		userId, err := rdb.Get(ctx, sessionId).Result()
 
 		if err != nil {
 			ctx.JSON(401, gin.H{"message": "Unauthorized"})
@@ -30,16 +30,16 @@ func AuthMiddleware(db *sqlx.DB, rdb *redis.Client) gin.HandlerFunc {
 			return
 		}
 
-		user_auth_info := UserAuthInfo{}
-		database_error := db.Get(&user_auth_info, `SELECT u.id, u.email FROM "user" u WHERE u.id=$1`, user_id)
-		if database_error != nil {
+		userAuthInfo := UserAuthInfo{}
+		err = db.Get(&userAuthInfo, `SELECT u.id, u.email FROM "user" u WHERE u.id=$1`, userId)
+		if err != nil {
 			ctx.JSON(401, gin.H{"message": "Unauthorized"})
 			ctx.Abort()
 			return
 		}
 
-		ctx.Set("user_id", user_auth_info.Id)
-		ctx.Set("user_email", user_auth_info.Email)
+		ctx.Set("userId", userAuthInfo.Id)
+		ctx.Set("userEmail", userAuthInfo.Email)
 
 		ctx.Next()
 	}
