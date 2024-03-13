@@ -3,27 +3,26 @@ package main
 import (
 	"log"
 
-	auth "server/lib/middlewares/auth"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 )
 
 func main() {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Password: "",
+		DB:       0,
 	})
 
-	db, err := sqlx.Connect("postgres", "user=postgres dbname=go-api password=password sslmode=disable")
+	db, err := sqlx.Connect("postgres", "user=postgres dbname=banoffee password=5up3r_s3cur3_p4ssw0rd sslmode=disable")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	router := gin.Default()
-	router.Use(auth.AuthMiddleware(db, rdb))
+	router.Group("/").Use(AuthMiddleware(db, rdb))
 
 	router.GET("/health-check", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })
 
