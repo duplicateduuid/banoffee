@@ -33,7 +33,7 @@ func (a *API) Run() {
 	router.GET("/health-check", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })
 	router.POST("/login", a.handleLogin())
 
-	router.Run("localhost:8080")
+	router.Run(a.addr)
 }
 
 func (s *API) handleLogin() gin.HandlerFunc {
