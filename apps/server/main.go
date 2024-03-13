@@ -1,9 +1,8 @@
 package main
 
-import (
-	"log"
-)
-
 func main() {
-	api := NewAPI()
+	repositories := NewPostgresRepositories()
+	api := NewAPI("localhost:6969", *repositories)
+
+	api.Run()
 }

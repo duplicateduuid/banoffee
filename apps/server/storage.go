@@ -1,9 +1,9 @@
 package main
 
 import (
-	"crypto/bcrypt"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"hash"
+	"log"
 )
 
 type Repositories struct {
@@ -12,10 +12,36 @@ type Repositories struct {
 
 type UserRepository interface {
 	CreateUser(*User) error
+	GetAuthUser(string, User) error
 }
 
 type UserPostgresRepository struct {
 	db *sqlx.DB
+}
+
+func NewPostgresRepositories() *Repositories {
+	db, err := sqlx.Connect("postgres", "user=postgres dbname=banoffee password=5up3r_s3cur3_p4ssw0rd sslmode=disable")
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	userRepo := UserPostgresRepository{
+		db: db,
+	}
+
+	return &Repositories{
+		userRepository: userRepo,
+	}
+}
+
+type UserAuthInfo struct {
+	Id    uuid.UUID `db:"id" json:"id"`
+	Email string    `db:"email" json:"email"`
+}
+
+func (u UserPostgresRepository) GetAuthUser(id string, user User) error {
+	return u.db.Get(user, `SELECT u.id, u.email FROM "user" u WHERE u.id=$1`, id)
 }
 
 func (u UserPostgresRepository) CreateUser(user *User) error {
