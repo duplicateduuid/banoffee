@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	bcrypt "golang.org/x/crypto/bcrypt"
 )
 
 type Repositories struct {
@@ -46,14 +47,18 @@ func (u UserPostgresRepository) GetUser(id uuid.UUID, user User) error {
 }
 
 func (u UserPostgresRepository) CreateUser(user *User) error {
-	_, err := u.db.Exec(
-		`INSERT INTO "user" (email, password, username, avatar_url, header_url, bio)
-		VALUES ($1, $2, $3, $4, $5, $6)`,
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.password), 10)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = u.db.Exec(
+		`INSERT INTO "user" (email, password, username)
+		VALUES ($1, $2, $3)`,
 		user.email,
+		string(hashedPassword),
 		user.username,
-		user.avatarUrl,
-		user.headerUrl,
-		user.bio,
 	)
 
 	return err
