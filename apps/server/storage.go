@@ -44,8 +44,13 @@ func NewPostgresRepositories() *Repositories {
 		db: db,
 	}
 
+	resourceRepo := ResourcePostgresRepository{
+		db: db,
+	}
+
 	return &Repositories{
-		userRepository: userRepo,
+		userRepository:     userRepo,
+		resourceRepository: resourceRepo,
 	}
 }
 
