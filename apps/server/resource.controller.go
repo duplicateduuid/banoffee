@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type CreateResourcePayload struct {
@@ -39,9 +38,9 @@ func (s *API) handleCreateResource() gin.HandlerFunc {
 }
 
 type GetResourcePayload struct {
-	Id   *uuid.UUID `db:"id" form:"id"`
-	Url  *string    `db:"url" form:"url"`
-	Name *string    `db:"name" form:"name"`
+	Id   string `db:"id" form:"id"`
+	Url  string `db:"url" form:"url"`
+	Name string `db:"name" form:"name"`
 }
 
 func (s *API) handleGetResource() gin.HandlerFunc {
@@ -53,8 +52,8 @@ func (s *API) handleGetResource() gin.HandlerFunc {
 			return
 		}
 
-		if req.Id != nil {
-			resource, err := s.repositories.resourceRepository.GetResourceById(*req.Id)
+		if req.Id != "" {
+			resource, err := s.repositories.resourceRepository.GetResourceById(req.Id)
 
 			if err != nil {
 				ctx.JSON(400, gin.H{"error": "Invalid ID"})
@@ -65,8 +64,8 @@ func (s *API) handleGetResource() gin.HandlerFunc {
 			return
 		}
 
-		if req.Url != nil {
-			resource, err := s.repositories.resourceRepository.GetResourceByUrl(*req.Url)
+		if req.Url != "" {
+			resource, err := s.repositories.resourceRepository.GetResourceByUrl(req.Url)
 
 			if err != nil {
 				ctx.JSON(400, gin.H{"error": "Invalid URL"})
@@ -77,8 +76,8 @@ func (s *API) handleGetResource() gin.HandlerFunc {
 			return
 		}
 
-		if req.Name != nil {
-			resource, err := s.repositories.resourceRepository.GetResourceByName(*req.Name)
+		if req.Name != "" {
+			resource, err := s.repositories.resourceRepository.GetResourceByName(req.Name)
 
 			if err != nil {
 				ctx.JSON(400, gin.H{"error": "Invalid Name"})
