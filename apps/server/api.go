@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 
+	"encoding/json"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type API struct {
@@ -46,18 +49,32 @@ type loginJson struct {
 
 func (s *API) handleLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var json loginJson
+		var payload loginJson
 
-		if ctx.ShouldBindJSON(&json) != nil {
+		if ctx.ShouldBindJSON(&payload) != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid input"})
 			return
 		}
 
 		var user User
 		// TODO: validate email
-		if s.repositories.userRepository.GetUserByEmail(json.email, user) != nil {
-			ctx.JSON(400, gin.H{"error": "Invalid input"})
+		if s.repositories.userRepository.GetUserByEmail(payload.email, user) != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid email or password"})
+			return
 		}
+
+		if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.password)) != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid email or password"})
+			return
+		}
+
+		body, err := json.Marshal(user)
+
+		if err != nil {
+			ctx.JSON(400, gin.H{"error": "failed to serialize user"})
+		}
+
+		ctx.JSON(200, gin.H{"user": body})
 	}
 }
 
