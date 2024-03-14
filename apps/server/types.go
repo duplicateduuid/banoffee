@@ -22,9 +22,9 @@ type Resource struct {
 	Id          uuid.UUID `db:"id" json:"id"`
 	Url         string    `db:"url" json:"url"`
 	Name        string    `db:"name" json:"name"`
-	ImageUrl    string    `db:"image_url" json:"image_url"`
-	Author      string    `db:"author" json:"author"`
-	Description string    `db:"description" json:"description"`
+	ImageUrl    *string   `db:"image_url" json:"image_url"`
+	Author      *string   `db:"author" json:"author"`
+	Description *string   `db:"description" json:"description"`
 	CreatedAt   time.Time `db:"created_at" json:"created_at"`
 }
 
@@ -48,4 +48,14 @@ func NewUser(email string, username string, password string, avatarUrl string, h
 		Bio:               bio,
 		CreatedAt:         time.Now().UTC(),
 	}, nil
+}
+
+func NewResource(url string, name string, imageUrl *string, author *string, description *string) *Resource {
+	return &Resource{
+		Url:         url,
+		Name:        name,
+		ImageUrl:    imageUrl,
+		Author:      author,
+		Description: description,
+	}
 }
