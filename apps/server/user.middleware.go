@@ -34,7 +34,7 @@ func AuthMiddleware(repo UserRepository, rdb *redis.Client) gin.HandlerFunc {
 		}
 
 		user := User{}
-		repo.GetUserById(id, user)
+		repo.GetUserById(id, &user)
 
 		if err != nil {
 			ctx.JSON(401, gin.H{"message": "Unauthorized"})

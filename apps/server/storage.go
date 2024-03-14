@@ -14,8 +14,8 @@ type Repositories struct {
 
 type UserRepository interface {
 	CreateUser(*User) error
-	GetUserById(uuid.UUID, User) error
-	GetUserByEmail(string, User) error
+	GetUserById(uuid.UUID, *User) error
+	GetUserByEmail(string, *User) error
 }
 
 type UserPostgresRepository struct {
@@ -43,19 +43,19 @@ type UserAuthInfo struct {
 	Email string    `db:"email" json:"email"`
 }
 
-func (u UserPostgresRepository) GetUserById(id uuid.UUID, user User) error {
+func (u UserPostgresRepository) GetUserById(id uuid.UUID, user *User) error {
 	return u.db.Get(
 		user,
-		`SELECT u.id, u.email u.password u.username u.avatar_url u.header_url u.bio
+		`SELECT u.id, u.email, u.password, u.username, u.avatar_url, u.header_url, u.bio
 		FROM "user" u WHERE u.id=$1`,
 		id,
 	)
 }
 
-func (u UserPostgresRepository) GetUserByEmail(email string, user User) error {
+func (u UserPostgresRepository) GetUserByEmail(email string, user *User) error {
 	return u.db.Get(
 		user,
-		`SELECT u.id, u.email u.password u.username u.avatar_url u.header_url u.bio
+		`SELECT u.id, u.email, u.password, u.username, u.avatar_url, u.header_url, u.bio
 		FROM "user" u WHERE u.email=$1`,
 		email,
 	)

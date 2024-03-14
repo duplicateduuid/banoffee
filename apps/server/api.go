@@ -42,28 +42,29 @@ func (a *API) Run() {
 	router.Run(a.addr)
 }
 
-type loginJson struct {
-	email    string
-	password string
+type LoginPayload struct {
+	Email    string `db:"email" json:"email"`
+	Password string `json:"password"`
 }
 
 func (s *API) handleLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var payload loginJson
+		payload := LoginPayload{}
 
 		if ctx.ShouldBindJSON(&payload) != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid input"})
 			return
 		}
 
-		var user User
+		user := User{}
 		// TODO: validate email
-		if s.repositories.userRepository.GetUserByEmail(payload.email, user) != nil {
+		err := s.repositories.userRepository.GetUserByEmail(payload.Email, &user)
+		if err != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid email or password"})
 			return
 		}
 
-		if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.password)) != nil {
+		if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)) != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid email or password"})
 			return
 		}
