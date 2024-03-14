@@ -28,6 +28,10 @@ type Resource struct {
 	CreatedAt   time.Time `db:"created_at" json:"created_at"`
 }
 
+func (u *User) ValidPassword(password string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(password)) == nil
+}
+
 func NewUser(email string, username string, password string, avatarUrl string, headerUrl string, bio string) (*User, error) {
 	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 

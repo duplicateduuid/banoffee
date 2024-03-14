@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewUser(t *testing.T) {
-	user, err := NewUser("henri@henri.com", "henri", "https://example.com/", "https://example.com/", "Hey, I'm Henri!")
+	user, err := NewUser("henri@henri.com", "henri", "password", "https://example.com/", "https://example.com/", "Hey, I'm Henri!")
 
 	assert.Nil(t, err)
 	fmt.Print("%+v\n", user)
