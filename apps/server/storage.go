@@ -25,8 +25,8 @@ type UserPostgresRepository struct {
 
 type ResourceRepository interface {
 	CreateResource(*Resource) error
-	GetResourceById(uuid.UUID, *Resource) error
-	GetResourceByUrl(string, *Resource) error
+	GetResourceById(uuid.UUID) (*Resource, error)
+	GetResourceByUrl(string) (*Resource, error)
 }
 
 type ResourcePostgresRepository struct {
@@ -108,18 +108,26 @@ func (r ResourcePostgresRepository) CreateResource(resource *Resource) error {
 	return err
 }
 
-func (r ResourcePostgresRepository) GetResourceById(id uuid.UUID, resource *Resource) error {
-	return r.db.Get(
+func (r ResourcePostgresRepository) GetResourceById(id uuid.UUID) (*Resource, error) {
+	resource := new(Resource)
+
+	err := r.db.Get(
 		resource,
 		`SELECT r.id, r.url, r.name, r.image_url, r.author, r.description, r.created_at FROM "resource" r WHERE r.id=$1`,
 		id,
 	)
+
+	return resource, err
 }
 
-func (r ResourcePostgresRepository) GetResourceByUrl(url string, resource *Resource) error {
-	return r.db.Get(
+func (r ResourcePostgresRepository) GetResourceByUrl(url string) (*Resource, error) {
+	resource := new(Resource)
+
+	err := r.db.Get(
 		resource,
 		`SELECT r.id, r.url, r.name, r.image_url, r.author, r.description, r.created_at FROM "resource" r WHERE r.url=$1`,
 		url,
 	)
+
+	return resource, err
 }
