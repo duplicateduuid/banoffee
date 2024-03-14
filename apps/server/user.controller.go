@@ -10,8 +10,8 @@ import (
 )
 
 type LoginPayload struct {
-	Email    string `db:"email" json:"email"`
-	Password string `json:"password"`
+	Email    string `db:"email" json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8,max=255"`
 }
 
 func (s *API) handleLogin() gin.HandlerFunc {
@@ -20,6 +20,15 @@ func (s *API) handleLogin() gin.HandlerFunc {
 
 		if ctx.ShouldBindJSON(&req) != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid input"})
+			return
+		}
+
+		validate := validator.New()
+
+		err := validate.Struct(req)
+		if err != nil {
+			errors := err.(validator.ValidationErrors)
+			ctx.JSON(400, gin.H{"error": fmt.Sprintf("validation errors: %s", errors)})
 			return
 		}
 
@@ -57,8 +66,8 @@ type RegisterRequest struct {
 	Email     string  `json:"email" validate:"required,email"`
 	Username  string  `json:"username" validate:"required,min=5,max=20"`
 	Password  string  `json:"password" validate:"required,min=8,max=255"`
-	AvatarUrl *string `json:"avatar_url" validate:"http_url"`
-	HeaderUrl *string `json:"header_url" validate:"http_url"`
+	AvatarUrl *string `json:"avatar_url"`
+	HeaderUrl *string `json:"header_url"`
 	Bio       *string `json:"bio" validate:"max=255"`
 }
 
