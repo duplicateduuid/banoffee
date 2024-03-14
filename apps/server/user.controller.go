@@ -67,9 +67,9 @@ type RegisterRequest struct {
 	Email     string  `json:"email" validate:"required,email"`
 	Username  string  `json:"username" validate:"required,min=5,max=20"`
 	Password  string  `json:"password" validate:"required,min=8,max=255"`
-	AvatarUrl *string `json:"avatar_url"`
-	HeaderUrl *string `json:"header_url"`
-	Bio       *string `json:"bio"`
+	AvatarUrl *string `json:"avatar_url" validate:"omitempty,http_url"`
+	HeaderUrl *string `json:"header_url" validate:"omitempty,http_url"`
+	Bio       *string `json:"bio" validate:"omitempty,max=255"`
 }
 
 func (s *API) hanlderRegister() gin.HandlerFunc {
