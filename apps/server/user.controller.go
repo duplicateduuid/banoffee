@@ -43,10 +43,6 @@ func (s *API) handleLogin() gin.HandlerFunc {
 			return
 		}
 
-		if err != nil {
-			ctx.JSON(400, gin.H{"error": "Failed to serialize user"})
-		}
-
 		session_id := uuid.New().String()
 		err = s.redis.Set(ctx, session_id, user.Id.String(), 0).Err()
 		if err != nil {
