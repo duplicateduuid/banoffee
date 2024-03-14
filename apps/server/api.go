@@ -34,6 +34,7 @@ func (a *API) SetupRouter() *gin.Engine {
 
 	authRouter.GET("/resource", a.handleGetResource())
 	authRouter.POST("/resource", a.handleCreateResource())
+	authRouter.GET("/resources", a.handleGetMyResources())
 
 	return router
 }

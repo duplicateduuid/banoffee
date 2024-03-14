@@ -27,6 +27,7 @@ type ResourceRepository interface {
 	GetResourceById(string) (*Resource, error)
 	GetResourceByUrl(string) (*Resource, error)
 	GetResourceByName(name string) (*Resource, error)
+	GetUserResources(user *User, limit int, offset int) (*[]Resource, error)
 }
 
 type ResourcePostgresRepository struct {
@@ -140,6 +141,35 @@ func (r ResourcePostgresRepository) GetResourceByName(name string) (*Resource, e
 		resource,
 		`SELECT r.id, r.url, r.name, r.image_url, r.author, r.description, r.created_at FROM "resource" r WHERE r.name=$1`,
 		name,
+	)
+
+	return resource, err
+}
+
+func (r ResourcePostgresRepository) GetUserResources(user *User, limit int, offset int) (*[]Resource, error) {
+	resource := new([]Resource)
+
+	err := r.db.Select(
+		resource,
+		`
+		SELECT 
+			r.id, r.url, r.name, r.image_url, r.author, r.description, r.created_at
+		FROM 
+			"resource" r 
+		LEFT JOIN 
+			"user_resource" ur ON ur.resource_id = r.id
+		WHERE
+			ur.user_id = $1
+		ORDER BY
+			r.created_at
+		LIMIT
+			$2
+		OFFSET
+			$3
+		`,
+		user.Id,
+		limit,
+		offset,
 	)
 
 	return resource, err
