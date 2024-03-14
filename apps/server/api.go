@@ -41,3 +41,20 @@ func (s *API) handleLogin() gin.HandlerFunc {
 
 	}
 }
+
+func (s *API) hanlderRegister() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		payload := User{}
+
+		if ctx.ShouldBindJSON(&payload) != nil {
+			ctx.JSON(400, gin.H{"error": "Bad input"})
+			return
+		}
+
+		err := s.repositories.userRepository.CreateUser(&payload)
+
+		if err != nil {
+
+		}
+	}
+}
