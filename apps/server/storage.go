@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 
 	"github.com/google/uuid"
@@ -8,7 +9,8 @@ import (
 )
 
 type Repositories struct {
-	userRepository UserRepository
+	userRepository     UserRepository
+	resourceRepository ResourceRepository
 }
 
 type UserRepository interface {
@@ -18,6 +20,16 @@ type UserRepository interface {
 }
 
 type UserPostgresRepository struct {
+	db *sqlx.DB
+}
+
+type ResourceRepository interface {
+	CreateResource(*Resource) error
+	GetResourceById(uuid.UUID, *Resource) error
+	GetResourceByUrl(string, *Resource) error
+}
+
+type ResourcePostgresRepository struct {
 	db *sqlx.DB
 }
 
@@ -70,4 +82,38 @@ func (u UserPostgresRepository) CreateUser(user *User) error {
 	)
 
 	return err
+}
+
+func (r ResourcePostgresRepository) CreateResource(resource *Resource) error {
+	imageUrl := sql.NullString{String: resource.ImageUrl, Valid: resource.ImageUrl != ""}
+	author := sql.NullString{String: resource.Author, Valid: resource.Author != ""}
+	description := sql.NullString{String: resource.Description, Valid: resource.Description != ""}
+
+	_, err := r.db.Exec(
+		`INSERT INTO "resource" (url, name, image_url, author, description)
+		VALUES ($1, $2, $3, $4, $5)`,
+		resource.Url,
+		resource.Name,
+		imageUrl,
+		author,
+		description,
+	)
+
+	return err
+}
+
+func (r ResourcePostgresRepository) GetResourceById(id uuid.UUID, resource *Resource) error {
+	return r.db.Get(
+		resource,
+		`SELECT r.id, r.url, r.name, r.image_url, r.author, r.description, r.created_at FROM "resource" r WHERE r.id=$1`,
+		id,
+	)
+}
+
+func (r ResourcePostgresRepository) GetResourceByUrl(url string, resource *Resource) error {
+	return r.db.Get(
+		resource,
+		`SELECT r.id, r.url, r.name, r.image_url, r.author, r.description, r.created_at FROM "resource" r WHERE r.url=$1`,
+		url,
+	)
 }
