@@ -8,11 +8,13 @@ import (
 )
 
 func TestNewUser(t *testing.T) {
+	t.Parallel()
+
 	user, err := NewUser("henri@henri.com", "henri", "password", nil, nil, nil)
 
 	assert.Nil(t, err)
-	assert.Nil(user.AvatarUrl)
-	assert.Nil(user.HeaderUrl)
-	assert.Nil(user.Bio)
-	fmt.Print("%+v\n", user)
+	assert.Nil(t, user.AvatarUrl)
+	assert.Nil(t, user.HeaderUrl)
+	assert.Nil(t, user.Bio)
+	fmt.Printf("%+v\n", user)
 }

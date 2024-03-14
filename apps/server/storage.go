@@ -33,7 +33,7 @@ type ResourcePostgresRepository struct {
 	db *sqlx.DB
 }
 
-func NewPostgresRepositories() *Repositories {
+func NewPostgresRepositories() Repositories {
 	db, err := sqlx.Connect("postgres", "user=postgres dbname=banoffee password=5up3r_s3cur3_p4ssw0rd sslmode=disable")
 
 	if err != nil {
@@ -44,7 +44,7 @@ func NewPostgresRepositories() *Repositories {
 		db: db,
 	}
 
-	return &Repositories{
+	return Repositories{
 		userRepository: userRepo,
 	}
 }

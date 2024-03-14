@@ -7,12 +7,11 @@ import (
 )
 
 type API struct {
-	addr         string
 	repositories Repositories
 	redis        *redis.Client
 }
 
-func NewAPI(addr string, repositories Repositories) *API {
+func NewAPI(repositories Repositories) *API {
 	redis := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
@@ -20,13 +19,12 @@ func NewAPI(addr string, repositories Repositories) *API {
 	})
 
 	return &API{
-		addr:         addr,
 		repositories: repositories,
 		redis:        redis,
 	}
 }
 
-func (a *API) Run() {
+func (a *API) SetupRouter() *gin.Engine {
 	router := gin.Default()
 	authRouter := router.Group("/").Use(AuthMiddleware(a.repositories.userRepository, a.redis))
 
@@ -37,5 +35,11 @@ func (a *API) Run() {
 	authRouter.GET("/resource", a.handleGetResource())
 	authRouter.POST("/resource", a.handleCreateResource())
 
-	router.Run(a.addr)
+	return router
+}
+
+func (a *API) Run(addr string) {
+	router := a.SetupRouter()
+
+	router.Run(addr)
 }

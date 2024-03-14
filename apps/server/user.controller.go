@@ -80,9 +80,9 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 			ctx.JSON(400, gin.H{"error": "Invalid input"})
 			return
 		}
+		fmt.Printf("%v", req)
 
 		validate := validator.New()
-
 		err := validate.Struct(req)
 		if err != nil {
 			errors := err.(validator.ValidationErrors)
@@ -98,8 +98,9 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 			return
 		}
 
-		if s.repositories.userRepository.CreateUser(user) != nil {
-			fmt.Println(err)
+		err = s.repositories.userRepository.CreateUser(user)
+		if err != nil {
+			fmt.Printf("[ERROR]: %v\n", err)
 			ctx.JSON(400, gin.H{"error": "Cannot create user"})
 			return
 		}

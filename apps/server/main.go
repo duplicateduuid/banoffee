@@ -2,7 +2,7 @@ package main
 
 func main() {
 	repositories := NewPostgresRepositories()
-	api := NewAPI("localhost:6969", *repositories)
+	api := NewAPI(repositories)
 
-	api.Run()
+	api.Run("localhost:6969")
 }
