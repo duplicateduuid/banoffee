@@ -12,9 +12,9 @@ type User struct {
 	Email             string    `db:"email" json:"email"`
 	EncryptedPassword string    `json:"-"`
 	Username          string    `db:"username" json:"username"`
-	AvatarUrl         string    `db:"avatar_url" json:"avatar_url"`
-	HeaderUrl         string    `db:"header_url" json:"header_url"`
-	Bio               string    `db:"bio" json:"bio"`
+	AvatarUrl         *string   `db:"avatar_url" json:"avatar_url"`
+	HeaderUrl         *string   `db:"header_url" json:"header_url"`
+	Bio               *string   `db:"bio" json:"bio"`
 	CreatedAt         time.Time `db:"created_at" json:"created_at"`
 }
 
@@ -32,7 +32,7 @@ func (u *User) ValidPassword(password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(password)) == nil
 }
 
-func NewUser(email string, username string, password string, avatarUrl string, headerUrl string, bio string) (*User, error) {
+func NewUser(email string, username string, password string, avatarUrl *string, headerUrl *string, bio *string) (*User, error) {
 	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	if err != nil {

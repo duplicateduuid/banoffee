@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
 
@@ -53,12 +54,12 @@ func (s *API) handleLogin() gin.HandlerFunc {
 }
 
 type RegisterRequest struct {
-	Email     string `json:"email"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
-	AvatarUrl string `json:"avatar_url"`
-	HeaderUrl string `json:"header_url"`
-	Bio       string `json:"bio"`
+	Email     string  `json:"email" validate:"required,email"`
+	Username  string  `json:"username" validate:"required,min=5,max=20"`
+	Password  string  `json:"password" validate:"required,min=8,max=255"`
+	AvatarUrl *string `json:"avatar_url" validate:"http_url"`
+	HeaderUrl *string `json:"header_url" validate:"http_url"`
+	Bio       *string `json:"bio" validate:"max=255"`
 }
 
 func (s *API) hanlderRegister() gin.HandlerFunc {
