@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type API struct {
@@ -52,22 +51,21 @@ type LoginPayload struct {
 
 func (s *API) handleLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		payload := LoginPayload{}
+		req := LoginPayload{}
 
-		if ctx.ShouldBindJSON(&payload) != nil {
+		if ctx.ShouldBindJSON(&req) != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid input"})
 			return
 		}
 
-		user := User{}
 		// TODO: validate email
-		err := s.repositories.userRepository.GetUserByEmail(payload.Email, &user)
+		user, err := s.repositories.userRepository.GetUserByEmail(req.Email)
 		if err != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid email or password"})
 			return
 		}
 
-		if bcrypt.CompareHashAndPassword([]byte(user.EncryptedPassword), []byte(payload.Password)) != nil {
+		if user.ValidPassword(req.Password) {
 			ctx.JSON(400, gin.H{"error": "Invalid email or password"})
 			return
 		}
