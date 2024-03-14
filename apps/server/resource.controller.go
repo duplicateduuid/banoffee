@@ -57,7 +57,7 @@ func (s *API) handleGetResource() gin.HandlerFunc {
 			resource, err := s.repositories.resourceRepository.GetResourceById(*req.Id)
 
 			if err != nil {
-				ctx.JSON(400, gin.H{"error": "Invalid URL"})
+				ctx.JSON(400, gin.H{"error": "Invalid ID"})
 				return
 			}
 
@@ -81,7 +81,7 @@ func (s *API) handleGetResource() gin.HandlerFunc {
 			resource, err := s.repositories.resourceRepository.GetResourceByName(*req.Name)
 
 			if err != nil {
-				ctx.JSON(400, gin.H{"error": "Invalid URL"})
+				ctx.JSON(400, gin.H{"error": "Invalid Name"})
 				return
 			}
 
