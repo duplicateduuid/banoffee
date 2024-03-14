@@ -36,9 +36,25 @@ func (a *API) Run() {
 	router.Run(a.addr)
 }
 
+type loginJson struct {
+	email    string
+	password string
+}
+
 func (s *API) handleLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		var json loginJson
 
+		if ctx.ShouldBindJSON(&json) != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid input"})
+			return
+		}
+
+		var user User
+		// TODO: validate email
+		if s.repositories.userRepository.GetUserByEmail(json.email, user) != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid input"})
+		}
 	}
 }
 
@@ -47,7 +63,7 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 		payload := User{}
 
 		if ctx.ShouldBindJSON(&payload) != nil {
-			ctx.JSON(400, gin.H{"error": "Bad input"})
+			ctx.JSON(400, gin.H{"error": "Invalid input"})
 			return
 		}
 
