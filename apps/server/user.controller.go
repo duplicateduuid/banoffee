@@ -71,6 +71,15 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 			return
 		}
 
+		validate := validator.New()
+
+		err := validate.Struct(req)
+		if err != nil {
+			errors := err.(validator.ValidationErrors)
+			ctx.JSON(400, gin.H{"error": fmt.Sprintf("validation errors: %s", errors)})
+			return
+		}
+
 		user, err := NewUser(req.Email, req.Username, req.Password, req.AvatarUrl, req.HeaderUrl, req.Bio)
 
 		if err != nil {
