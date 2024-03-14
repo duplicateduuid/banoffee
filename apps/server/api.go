@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
@@ -33,11 +34,13 @@ func NewAPI(addr string, repositories Repositories) *API {
 
 func (a *API) Run() {
 	router := gin.Default()
-	router.Group("/").Use(AuthMiddleware(a.repositories.userRepository, a.redis))
+	authRouter := router.Group("/").Use(AuthMiddleware(a.repositories.userRepository, a.redis))
 
 	router.GET("/health-check", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })
 	router.POST("/login", a.handleLogin())
 	router.POST("/register", a.hanlderRegister())
+
+	authRouter.GET("/resources", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })
 
 	router.Run(a.addr)
 }
@@ -73,6 +76,14 @@ func (s *API) handleLogin() gin.HandlerFunc {
 
 		if err != nil {
 			ctx.JSON(400, gin.H{"error": "failed to serialize user"})
+		}
+
+		session_id := uuid.New().String()
+		err = s.redis.Set(ctx, session_id, user.Id.String(), 0).Err()
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(400, gin.H{"error": "Unexpected error"})
+			return
 		}
 
 		ctx.JSON(200, gin.H{"user": body})
