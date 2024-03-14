@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -44,8 +43,6 @@ func (s *API) handleLogin() gin.HandlerFunc {
 			return
 		}
 
-		body, err := json.Marshal(user)
-
 		if err != nil {
 			ctx.JSON(400, gin.H{"error": "Failed to serialize user"})
 		}
@@ -59,7 +56,7 @@ func (s *API) handleLogin() gin.HandlerFunc {
 		}
 
 		ctx.SetCookie("sessionId", session_id, 3600*24, "/", "localhost", false, true)
-		ctx.JSON(200, gin.H{"user": body})
+		ctx.JSON(200, gin.H{"user": user})
 	}
 }
 
