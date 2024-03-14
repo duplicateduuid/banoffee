@@ -12,7 +12,7 @@ type Repositories struct {
 
 type UserRepository interface {
 	CreateUser(*User) error
-	GetAuthUser(string, User) error
+	GetAuthUser(uuid.UUID, User) error
 }
 
 type UserPostgresRepository struct {
@@ -40,7 +40,7 @@ type UserAuthInfo struct {
 	Email string    `db:"email" json:"email"`
 }
 
-func (u UserPostgresRepository) GetAuthUser(id string, user User) error {
+func (u UserPostgresRepository) GetAuthUser(id uuid.UUID, user User) error {
 	return u.db.Get(user, `SELECT u.id, u.email FROM "user" u WHERE u.id=$1`, id)
 }
 
