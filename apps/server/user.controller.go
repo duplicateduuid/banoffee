@@ -69,7 +69,7 @@ type RegisterRequest struct {
 	Password  string  `json:"password" validate:"required,min=8,max=255"`
 	AvatarUrl *string `json:"avatar_url"`
 	HeaderUrl *string `json:"header_url"`
-	Bio       *string `json:"bio" validate:"max=255"`
+	Bio       *string `json:"bio"`
 }
 
 func (s *API) hanlderRegister() gin.HandlerFunc {
