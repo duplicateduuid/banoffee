@@ -58,6 +58,7 @@ func (s *API) handleLogin() gin.HandlerFunc {
 			return
 		}
 
+		ctx.SetCookie("sessionId", session_id, 3600*24, "/", "localhost", false, true)
 		ctx.JSON(200, gin.H{"user": body})
 	}
 }

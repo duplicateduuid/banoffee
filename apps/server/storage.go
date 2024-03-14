@@ -24,7 +24,7 @@ type UserPostgresRepository struct {
 
 type ResourceRepository interface {
 	CreateResource(*Resource) error
-	GetResourceById(uuid.UUID) (*Resource, error)
+	GetResourceById(string) (*Resource, error)
 	GetResourceByUrl(string) (*Resource, error)
 	GetResourceByName(name string) (*Resource, error)
 }
@@ -58,7 +58,7 @@ func (u UserPostgresRepository) GetUserById(id uuid.UUID) (*User, error) {
 	user := new(User)
 	err := u.db.Get(
 		user,
-		`SELECT u.id, u.email, u.password, u.username, u.avatar_url, u.header_url, u.bio
+		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio
 		FROM "user" u WHERE u.id=$1`,
 		id,
 	)
@@ -70,7 +70,7 @@ func (u UserPostgresRepository) GetUserByEmail(email string) (*User, error) {
 	user := new(User)
 	err := u.db.Get(
 		user,
-		`SELECT u.id, u.email, u.password, u.username, u.avatar_url, u.header_url, u.bio
+		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio
 		FROM "user" u WHERE u.email=$1`,
 		email,
 	)
@@ -104,7 +104,7 @@ func (r ResourcePostgresRepository) CreateResource(resource *Resource) error {
 	return err
 }
 
-func (r ResourcePostgresRepository) GetResourceById(id uuid.UUID) (*Resource, error) {
+func (r ResourcePostgresRepository) GetResourceById(id string) (*Resource, error) {
 	resource := new(Resource)
 
 	err := r.db.Get(
