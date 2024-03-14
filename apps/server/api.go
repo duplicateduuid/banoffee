@@ -67,7 +67,7 @@ func (s *API) handleLogin() gin.HandlerFunc {
 			return
 		}
 
-		if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)) != nil {
+		if bcrypt.CompareHashAndPassword([]byte(user.EncryptedPassword), []byte(payload.Password)) != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid email or password"})
 			return
 		}
@@ -90,18 +90,33 @@ func (s *API) handleLogin() gin.HandlerFunc {
 	}
 }
 
+type RegisterRequest struct {
+	Email     string `json:"email"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	AvatarUrl string `json:"avatar_url"`
+	HeaderUrl string `json:"header_url"`
+	Bio       string `json:"bio"`
+}
+
 func (s *API) hanlderRegister() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		payload := User{}
+		req := RegisterRequest{}
 
-		if ctx.ShouldBindJSON(&payload) != nil {
+		if ctx.ShouldBindJSON(&req) != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid input"})
 			return
 		}
 
-		err := s.repositories.userRepository.CreateUser(&payload)
+		user, err := NewUser(req.Email, req.Username, req.Password, req.AvatarUrl, req.HeaderUrl, req.Bio)
 
 		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(500, gin.H{"error": "failed to hash password"})
+			return
+		}
+
+		if s.repositories.userRepository.CreateUser(user) != nil {
 			fmt.Println(err)
 			ctx.JSON(400, gin.H{"error": "Cannot create user"})
 			return
