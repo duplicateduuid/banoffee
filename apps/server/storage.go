@@ -62,7 +62,7 @@ func (u UserPostgresRepository) GetUserByEmail(email string, user User) error {
 }
 
 func (u UserPostgresRepository) CreateUser(user *User) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.password), 10)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 
 	if err != nil {
 		return err
@@ -71,9 +71,9 @@ func (u UserPostgresRepository) CreateUser(user *User) error {
 	_, err = u.db.Exec(
 		`INSERT INTO "user" (email, password, username)
 		VALUES ($1, $2, $3)`,
-		user.email,
+		user.Email,
 		string(hashedPassword),
-		user.username,
+		user.Username,
 	)
 
 	return err

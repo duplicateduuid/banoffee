@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
@@ -32,6 +34,7 @@ func (a *API) Run() {
 
 	router.GET("/health-check", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })
 	router.POST("/login", a.handleLogin())
+	router.POST("/register", a.hanlderRegister())
 
 	router.Run(a.addr)
 }
@@ -70,7 +73,11 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 		err := s.repositories.userRepository.CreateUser(&payload)
 
 		if err != nil {
-
+			fmt.Println(err)
+			ctx.JSON(400, gin.H{"error": "Cannot create user"})
+			return
 		}
+
+		ctx.JSON(200, gin.H{"message": "User created with success!"})
 	}
 }
