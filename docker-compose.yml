@@ -1,4 +1,10 @@
 services:
+  redis:
+    image: redis
+    command: redis-server
+    ports:
+      - "6379:6379"
+  
   db:
     image: postgres:latest
     container_name: banoffee
@@ -9,10 +15,22 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: banoffee
-      # TODO: get from .env
       POSTGRES_PASSWORD: 5up3r_s3cur3_p4ssw0rd
     ports:
       - "5432:5432"
+
+  testing_db:
+    image: postgres:latest
+    container_name: banoffee_test
+    restart: unless-stopped
+    volumes:
+      - ./migrations:/docker-entrypoint-initdb.d/
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: test
+    ports:
+      - "5433:5432"      
 
 volumes:
   postgres-data: null
