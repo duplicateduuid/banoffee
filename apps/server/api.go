@@ -73,7 +73,7 @@ func (s *API) handleLogin() gin.HandlerFunc {
 		body, err := json.Marshal(user)
 
 		if err != nil {
-			ctx.JSON(400, gin.H{"error": "failed to serialize user"})
+			ctx.JSON(400, gin.H{"error": "Failed to serialize user"})
 		}
 
 		session_id := uuid.New().String()
@@ -110,7 +110,7 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 
 		if err != nil {
 			fmt.Println(err)
-			ctx.JSON(500, gin.H{"error": "failed to hash password"})
+			ctx.JSON(500, gin.H{"error": "Failed to hash password"})
 			return
 		}
 
