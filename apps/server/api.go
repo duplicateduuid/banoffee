@@ -34,7 +34,8 @@ func (a *API) Run() {
 	router.POST("/login", a.handleLogin())
 	router.POST("/register", a.hanlderRegister())
 
-	authRouter.GET("/resources", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })
+	authRouter.GET("/resource", a.handleGetResource())
+	authRouter.POST("/resource", a.handleCreateResource())
 
 	router.Run(a.addr)
 }
