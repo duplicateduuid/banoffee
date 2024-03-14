@@ -2,8 +2,8 @@
 CREATE TABLE "user_resource" (
     user_id UUID,
     resource_id UUID,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_d, resource_id),
 
     CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES "user"(id),
