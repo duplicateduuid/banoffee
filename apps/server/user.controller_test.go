@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,33 +11,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func repo(t *testing.T) Repositories {
-	db, err := sqlx.Connect("postgres", "postgres://test:test@localhost:5433/test?sslmode=disable")
-	if err != nil {
-		fmt.Printf("[ERRO] %v", err)
+func deleteUserByEmail(email string) func(*sqlx.DB) {
+	return func(db *sqlx.DB) {
+		db.Exec(`DELETE FROM "user" WHERE email = $1`, email)
 	}
-
-	userRepo := UserPostgresRepository{
-		db: db,
-	}
-
-	t.Cleanup(func() {
-		deleteUserByEmail("henri@henri.com", db)
-	})
-
-	return Repositories{
-		userRepository: userRepo,
-	}
-}
-
-func deleteUserByEmail(email string, db *sqlx.DB) {
-	db.Exec(`DELETE FROM "user" WHERE email = $1`, email)
 }
 
 func TestRegister(t *testing.T) {
 	t.Parallel()
 
-	repo := repo(t)
+	repo := testRepositories(deleteUserByEmail("henri@henri.com"), t)
 	router := NewAPI(repo).SetupRouter()
 
 	user := RegisterRequest{
