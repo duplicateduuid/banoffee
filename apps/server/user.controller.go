@@ -116,6 +116,10 @@ func (s *API) handleGetMyResources() gin.HandlerFunc {
 			return
 		}
 
+		if req.Limit == 0 {
+			req.Limit = 10
+		}
+
 		user := ctx.MustGet("user").(*User)
 
 		resources, err := s.repositories.userRepository.GetUserResources(user, req.Limit, req.Offset)
