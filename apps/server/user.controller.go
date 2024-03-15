@@ -103,8 +103,10 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 }
 
 type GetMyResourcesPayload struct {
-	Limit  int `db:"limit" form:"limit"`
-	Offset int `db:"offset" form:"offset"`
+	Limit        int    `db:"limit" form:"limit"`
+	Offset       int    `db:"offset" form:"offset"`
+	Status       string `db:"status" form:"status"`
+	ReviewRating string `db:"review_rating" form:"review_rating"`
 }
 
 func (s *API) handleGetMyResources() gin.HandlerFunc {
@@ -122,7 +124,7 @@ func (s *API) handleGetMyResources() gin.HandlerFunc {
 
 		user := ctx.MustGet("user").(*User)
 
-		resources, err := s.repositories.userRepository.GetUserResources(user, req.Limit, req.Offset)
+		resources, err := s.repositories.userRepository.GetUserResources(user, req.Limit, req.Offset, req.Status, req.ReviewRating)
 
 		if err != nil {
 			fmt.Println(err)

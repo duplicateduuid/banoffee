@@ -16,10 +16,10 @@ type UserRepository interface {
 	CreateUser(*User) error
 	GetUserById(uuid.UUID) (*User, error)
 	GetUserByEmail(string) (*User, error)
-	GetUserResources(user *User, limit int, offset int) (*[]Resource, error)
+	GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error)
 	GetUserResource(user *User, resourceId string) (*Resource, error)
-	CreateUserResource(user *User, resourceId string, status *string, review_rating *string, review_comment *string) error
-	UpdateUserResource(user *User, resourceId string, status *string, review_rating *string, review_comment *string) error
+	CreateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
+	UpdateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
 }
 
 type UserPostgresRepository struct {
@@ -99,7 +99,7 @@ func (u UserPostgresRepository) CreateUser(user *User) error {
 	return err
 }
 
-func (u UserPostgresRepository) GetUserResources(user *User, limit int, offset int) (*[]Resource, error) {
+func (u UserPostgresRepository) GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error) {
 	resource := new([]Resource)
 
 	err := u.db.Select(
@@ -113,6 +113,8 @@ func (u UserPostgresRepository) GetUserResources(user *User, limit int, offset i
 			"user_resource" ur ON ur.resource_id = r.id
 		WHERE
 			ur.user_id = $1
+			AND ($4 = '' OR ur.status::text = $4)
+            AND ($5 = '' OR ur.review_rating::text = $5)
 		ORDER BY
 			r.created_at
 		LIMIT
@@ -123,6 +125,8 @@ func (u UserPostgresRepository) GetUserResources(user *User, limit int, offset i
 		user.Id,
 		limit,
 		offset,
+		status,
+		reviewRating,
 	)
 
 	return resource, err
@@ -151,10 +155,10 @@ func (u UserPostgresRepository) GetUserResource(user *User, resourceId string) (
 	return resource, err
 }
 
-func (u UserPostgresRepository) CreateUserResource(user *User, resourceId string, status *string, review_rating *string, review_comment *string) error {
+func (u UserPostgresRepository) CreateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error {
 	newStatus := status
 
-	if review_rating != nil && status == nil {
+	if reviewRating != nil && status == nil {
 		updatedStatus := "ongoing"
 		newStatus = &updatedStatus
 	}
@@ -165,14 +169,14 @@ func (u UserPostgresRepository) CreateUserResource(user *User, resourceId string
 		user.Id,
 		resourceId,
 		newStatus,
-		review_rating,
-		review_comment,
+		reviewRating,
+		reviewComment,
 	)
 
 	return err
 }
 
-func (u UserPostgresRepository) UpdateUserResource(user *User, resourceId string, status *string, review_rating *string, review_comment *string) error {
+func (u UserPostgresRepository) UpdateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error {
 	_, err := u.db.Exec(
 		`
 			UPDATE "user_resource"
@@ -187,8 +191,8 @@ func (u UserPostgresRepository) UpdateUserResource(user *User, resourceId string
 		user.Id,
 		resourceId,
 		status,
-		review_rating,
-		review_comment,
+		reviewRating,
+		reviewComment,
 	)
 
 	return err
