@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -64,10 +64,22 @@ func newAuthTestRouter(repos Repositories, auth *User) testRouter {
 	return testRouter{router: router, auth: auth, repos: &repos}
 }
 
-func (r testRouter) get(path string, body []byte) *httptest.ResponseRecorder {
-	payload := bytes.NewReader(body)
+func buildQueryParams(path string, params map[string]string) string {
+	var query []string
+
+	for key, value := range params {
+		parameter := fmt.Sprintf("%s=%s", key, value)
+		query = append(query, parameter)
+	}
+
+	return path + strings.Join(query, "&")
+}
+
+func (r testRouter) get(path string, params map[string]string) *httptest.ResponseRecorder {
+	url := buildQueryParams(path, params)
+
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", path, payload)
+	req, _ := http.NewRequest("GET", url, nil)
 
 	if r.auth != nil {
 		sessionId := uuid.New().String()
@@ -78,13 +90,12 @@ func (r testRouter) get(path string, body []byte) *httptest.ResponseRecorder {
 			MaxAge: 3600 * 24,
 		})
 
-		err := r.repos.redis.Set(context.Background(), sessionId, r.auth.Id.String(), 10000).Err()
+		err := r.repos.redis.Set(context.Background(), sessionId, r.auth.Id.String(), 0).Err()
 
 		if err != nil {
-			panic(err)
+			fmt.Printf("[ERROR] [TestRouter.get] failed to store session on redis: %s\n", err)
 		}
-
-		fmt.Printf("[INFO] [testRouter.get] user id stored on redis: session(%s) => %s\n", sessionId, r.auth.Id)
+		fmt.Printf("[INFO] [TestRouter.get] user id stored on redis: session(%s) => %s\n", sessionId, r.auth.Id)
 	}
 
 	r.router.ServeHTTP(w, req)
