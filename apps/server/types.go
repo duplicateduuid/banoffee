@@ -8,27 +8,27 @@ import (
 )
 
 type User struct {
-	Id                uuid.UUID `db:"id" json:"id"`
-	Email             string    `db:"email" json:"email"`
-	EncryptedPassword string    `json:"-"`
-	Username          string    `db:"username" json:"username"`
-	AvatarUrl         *string   `db:"avatar_url" json:"avatar_url"`
-	HeaderUrl         *string   `db:"header_url" json:"header_url"`
-	Bio               *string   `db:"bio" json:"bio"`
-	CreatedAt         time.Time `db:"created_at" json:"created_at"`
+	Id                uuid.UUID `db:"id" json:"id" tstype:"string"`
+	Email             string    `db:"email" json:"email" tstype:"string"`
+	EncryptedPassword string    `json:"-" tstype:"string"`
+	Username          string    `db:"username" json:"username" tstype:"string"`
+	AvatarUrl         *string   `db:"avatar_url" json:"avatar_url" tstype:"string | null"`
+	HeaderUrl         *string   `db:"header_url" json:"header_url" tstype:"string | null"`
+	Bio               *string   `db:"bio" json:"bio" tstype:"string | null"`
+	CreatedAt         time.Time `db:"created_at" json:"created_at" tstype:"string"`
 }
 
 type Resource struct {
-	Id            uuid.UUID `db:"id" json:"id"`
-	Url           string    `db:"url" json:"url"`
-	Name          string    `db:"name" json:"name"`
-	ImageUrl      *string   `db:"image_url" json:"image_url"`
-	Author        *string   `db:"author" json:"author"`
-	Description   *string   `db:"description" json:"description"`
-	Status        *string   `db:"status" json:"status"`
-	ReviewRating  *string   `db:"review_rating" json:"review_rating"`
-	ReviewComment *string   `db:"review_comment" json:"review_comment"`
-	CreatedAt     time.Time `db:"created_at" json:"created_at"`
+	Id            uuid.UUID `db:"id" json:"id" tstype:"string"`
+	Url           string    `db:"url" json:"url" tstype:"string"`
+	Name          string    `db:"name" json:"name" tstype:"string"`
+	ImageUrl      *string   `db:"image_url" json:"image_url" tstype:"null | string"`
+	Author        *string   `db:"author" json:"author" tstype:"string | null"`
+	Description   *string   `db:"description" json:"description" tstype:"string | null"`
+	Status        *string   `db:"status" json:"status" tstype:"string | null"`
+	ReviewRating  *string   `db:"review_rating" json:"review_rating" tstype:"string | null"`
+	ReviewComment *string   `db:"review_comment" json:"review_comment" tstype:"string | null"`
+	CreatedAt     time.Time `db:"created_at" json:"created_at" tstype:"string"`
 }
 
 func (u *User) ValidPassword(password string) bool {
