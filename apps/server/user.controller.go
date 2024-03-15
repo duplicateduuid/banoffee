@@ -101,3 +101,67 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 		ctx.JSON(200, gin.H{"message": "User created with success!"})
 	}
 }
+
+type SaveResourcePayload struct {
+	Status        *string `db:"status" json:"status"`
+	ReviewRating  *string `db:"review_rating" json:"review_rating"`
+	ReviewComment *string `db:"review_comment" json:"review_comment"`
+}
+
+func (s *API) handleSaveResource() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		resourceId := ctx.Param("id")
+
+		if resourceId == "" {
+			ctx.JSON(400, gin.H{"error": "Invalid input"})
+			return
+		}
+
+		req := SaveResourcePayload{}
+
+		if ctx.ShouldBindJSON(&req) != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid input"})
+			return
+		}
+
+		user := ctx.MustGet("user").(*User)
+
+		resource, err := s.repositories.resourceRepository.GetResourceById(resourceId)
+
+		if err != nil {
+			ctx.JSON(400, gin.H{"error": "Cannot retrieve resource"})
+			return
+		}
+
+		_, err = s.repositories.userRepository.GetUserResource(user, resourceId)
+
+		if err != nil {
+			err = s.repositories.userRepository.CreateUserResource(user, resourceId, req.Status, req.ReviewRating, req.ReviewComment)
+
+			if err != nil {
+				fmt.Println(err)
+				ctx.JSON(400, gin.H{"error": "Failed to create resource"})
+				return
+			}
+
+			ctx.JSON(200, gin.H{"message": "Resource created with success"})
+		} else {
+			newStatus := req.Status
+
+			if resource.Status == nil && req.Status == nil && req.ReviewRating != nil {
+				updatedStatus := "ongoing"
+				newStatus = &updatedStatus
+			}
+
+			err = s.repositories.userRepository.UpdateUserResource(user, resourceId, newStatus, req.ReviewRating, req.ReviewComment)
+
+			if err != nil {
+				fmt.Println(err)
+				ctx.JSON(400, gin.H{"error": "Failed to update resource"})
+				return
+			}
+
+			ctx.JSON(200, gin.H{"message": "Resource updated with success"})
+		}
+	}
+}

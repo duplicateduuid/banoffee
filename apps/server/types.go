@@ -19,13 +19,16 @@ type User struct {
 }
 
 type Resource struct {
-	Id          uuid.UUID `db:"id" json:"id"`
-	Url         string    `db:"url" json:"url"`
-	Name        string    `db:"name" json:"name"`
-	ImageUrl    *string   `db:"image_url" json:"image_url"`
-	Author      *string   `db:"author" json:"author"`
-	Description *string   `db:"description" json:"description"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at"`
+	Id            uuid.UUID `db:"id" json:"id"`
+	Url           string    `db:"url" json:"url"`
+	Name          string    `db:"name" json:"name"`
+	ImageUrl      *string   `db:"image_url" json:"image_url"`
+	Author        *string   `db:"author" json:"author"`
+	Description   *string   `db:"description" json:"description"`
+	Status        *string   `db:"status" json:"status"`
+	ReviewRating  *string   `db:"review_rating" json:"review_rating"`
+	ReviewComment *string   `db:"review_comment" json:"review_comment"`
+	CreatedAt     time.Time `db:"created_at" json:"created_at"`
 }
 
 func (u *User) ValidPassword(password string) bool {
