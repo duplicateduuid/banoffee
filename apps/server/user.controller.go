@@ -136,7 +136,9 @@ func (s *API) handleGetMyResources() gin.HandlerFunc {
 }
 
 type SaveResourcePayload struct {
-	Status string `db:"status" json:"status"`
+	Status        *string `db:"status" json:"status"`
+	ReviewNote    *string `db:"review_note" json:"review_note"`
+	ReviewComment *string `db:"review_comment" json:"review_comment"`
 }
 
 func (s *API) handleSaveResource() gin.HandlerFunc {
@@ -167,18 +169,20 @@ func (s *API) handleSaveResource() gin.HandlerFunc {
 		_, err = s.repositories.userRepository.GetUserResource(user, resourceId)
 
 		if err != nil {
-			err = s.repositories.userRepository.CreateUserResource(user, resourceId, req.Status)
+			err = s.repositories.userRepository.CreateUserResource(user, resourceId, req.Status, req.ReviewNote, req.ReviewComment)
 
 			if err != nil {
+				fmt.Println(err)
 				ctx.JSON(400, gin.H{"error": "Failed to create resource"})
 				return
 			}
 
 			ctx.JSON(200, gin.H{"message": "Resource created with success"})
 		} else {
-			err = s.repositories.userRepository.UpdateUserResource(user, resourceId, req.Status)
+			err = s.repositories.userRepository.UpdateUserResource(user, resourceId, req.Status, req.ReviewNote, req.ReviewComment)
 
 			if err != nil {
+				fmt.Println(err)
 				ctx.JSON(400, gin.H{"error": "Failed to update resource"})
 				return
 			}

@@ -18,8 +18,8 @@ type UserRepository interface {
 	GetUserByEmail(string) (*User, error)
 	GetUserResources(user *User, limit int, offset int) (*[]Resource, error)
 	GetUserResource(user *User, resourceId string) (*Resource, error)
-	CreateUserResource(user *User, resourceId string, status string) error
-	UpdateUserResource(user *User, resourceId string, status string) error
+	CreateUserResource(user *User, resourceId string, status *string, review_note *string, review_comment *string) error
+	UpdateUserResource(user *User, resourceId string, status *string, review_note *string, review_comment *string) error
 }
 
 type UserPostgresRepository struct {
@@ -106,7 +106,7 @@ func (u UserPostgresRepository) GetUserResources(user *User, limit int, offset i
 		resource,
 		`
 		SELECT 
-			r.id, r.url, r.name, r.image_url, r.author, r.description, ur.status, r.created_at
+			r.id, r.url, r.name, r.image_url, r.author, r.description, ur.status, ur.review_note, ur.review_comment, r.created_at
 		FROM 
 			"resource" r 
 		LEFT JOIN 
@@ -135,7 +135,7 @@ func (u UserPostgresRepository) GetUserResource(user *User, resourceId string) (
 		resource,
 		`
 		SELECT 
-			r.id, r.url, r.name, r.image_url, r.author, r.description, ur.status, r.created_at
+			r.id, r.url, r.name, r.image_url, r.author, r.description, ur.status, ur.review_note, ur.review_comment, r.created_at
 		FROM 
 			"resource" r 
 		LEFT JOIN 
@@ -151,24 +151,28 @@ func (u UserPostgresRepository) GetUserResource(user *User, resourceId string) (
 	return resource, err
 }
 
-func (u UserPostgresRepository) CreateUserResource(user *User, resourceId string, status string) error {
+func (u UserPostgresRepository) CreateUserResource(user *User, resourceId string, status *string, review_note *string, review_comment *string) error {
 	_, err := u.db.Exec(
-		`INSERT INTO "user_resource" (user_id, resource_id, status)
-		VALUES ($1, $2, $3)`,
+		`INSERT INTO "user_resource" (user_id, resource_id, status, review_note, review_comment)
+		VALUES ($1, $2, $3, $4, $5)`,
 		user.Id,
 		resourceId,
 		status,
+		review_note,
+		review_comment,
 	)
 
 	return err
 }
 
-func (u UserPostgresRepository) UpdateUserResource(user *User, resourceId string, status string) error {
+func (u UserPostgresRepository) UpdateUserResource(user *User, resourceId string, status *string, review_note *string, review_comment *string) error {
 	_, err := u.db.Exec(
 		`
 			UPDATE "user_resource"
 			SET
-				status = $3
+				status = COALESCE($3, status),
+				review_note = COALESCE($4, review_note),
+				review_comment = COALESCE($5, review_comment)
 			WHERE
 				user_id = $1
 				AND resource_id = $2
@@ -176,6 +180,8 @@ func (u UserPostgresRepository) UpdateUserResource(user *User, resourceId string
 		user.Id,
 		resourceId,
 		status,
+		review_note,
+		review_comment,
 	)
 
 	return err
