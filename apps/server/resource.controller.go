@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -39,29 +40,47 @@ func (s *API) handleCreateResource() gin.HandlerFunc {
 }
 
 type SearchResourceRequest struct {
-	Name string `json:"name" validate:"required" tstype:"string"`
+	Name   string `validate:"required" tstype:"string"`
+	Limit  int    `tstype:"int"`
+	Offset int    `tstype:"int"`
+}
+
+type SearchResourceResponse struct {
+	Resources []Resource `json:"resources"`
 }
 
 func (s *API) handleSearchResource() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		name := ctx.Query("name")
-		req := SearchResourceRequest{Name: name}
+		limit, err := strconv.Atoi(ctx.Query("limit"))
+		offset, err := strconv.Atoi(ctx.Query("offset"))
+
+		if err != nil {
+			ctx.JSON(400, gin.H{"error": fmt.Sprintf("invalid pagination")})
+			return
+		}
+
+		req := SearchResourceRequest{
+			Name:   ctx.Query("name"),
+			Limit:  limit,
+			Offset: offset,
+		}
 
 		validate := validator.New()
-		err := validate.Struct(req)
+		err = validate.Struct(req)
 		if err != nil {
 			errors := err.(validator.ValidationErrors)
 			ctx.JSON(400, gin.H{"error": fmt.Sprintf("valiadtion errors: %s", errors)})
 			return
 		}
 
-		resources, err := s.repositories.resourceRepository.SearchByName(req.Name)
+		resources, err := s.repositories.resourceRepository.SearchByName(req.Name, req.Limit, req.Offset)
 		if err != nil {
-			ctx.JSON(400, gin.H{"error": "failed to search resources"})
+			ctx.JSON(400, gin.H{"error": fmt.Sprintf("failed to search resources: %s", err)})
 			return
 		}
 
-		ctx.JSON(200, gin.H{"resources": resources})
+		response := SearchResourceResponse{Resources: *resources}
+		ctx.JSON(200, response)
 	}
 }
 
