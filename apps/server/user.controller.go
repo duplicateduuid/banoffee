@@ -137,7 +137,7 @@ func (s *API) handleGetMyResources() gin.HandlerFunc {
 
 type SaveResourcePayload struct {
 	Status        *string `db:"status" json:"status"`
-	ReviewNote    *string `db:"review_note" json:"review_note"`
+	ReviewRating  *string `db:"review_rating" json:"review_rating"`
 	ReviewComment *string `db:"review_comment" json:"review_comment"`
 }
 
@@ -169,7 +169,7 @@ func (s *API) handleSaveResource() gin.HandlerFunc {
 		_, err = s.repositories.userRepository.GetUserResource(user, resourceId)
 
 		if err != nil {
-			err = s.repositories.userRepository.CreateUserResource(user, resourceId, req.Status, req.ReviewNote, req.ReviewComment)
+			err = s.repositories.userRepository.CreateUserResource(user, resourceId, req.Status, req.ReviewRating, req.ReviewComment)
 
 			if err != nil {
 				fmt.Println(err)
@@ -179,7 +179,7 @@ func (s *API) handleSaveResource() gin.HandlerFunc {
 
 			ctx.JSON(200, gin.H{"message": "Resource created with success"})
 		} else {
-			err = s.repositories.userRepository.UpdateUserResource(user, resourceId, req.Status, req.ReviewNote, req.ReviewComment)
+			err = s.repositories.userRepository.UpdateUserResource(user, resourceId, req.Status, req.ReviewRating, req.ReviewComment)
 
 			if err != nil {
 				fmt.Println(err)

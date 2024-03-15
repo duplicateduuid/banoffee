@@ -26,7 +26,7 @@ type Resource struct {
 	Author        *string   `db:"author" json:"author"`
 	Description   *string   `db:"description" json:"description"`
 	Status        *string   `db:"status" json:"status"`
-	ReviewNote    *string   `db:"review_note" json:"review_note"`
+	ReviewRating  *string   `db:"review_rating" json:"review_rating"`
 	ReviewComment *string   `db:"review_comment" json:"review_comment"`
 	CreatedAt     time.Time `db:"created_at" json:"created_at"`
 }
