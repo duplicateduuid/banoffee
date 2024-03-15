@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	"github.com/redis/go-redis/v9"
 )
 
 type API struct {
@@ -11,13 +10,6 @@ type API struct {
 }
 
 func NewAPI(reops Repositories) *API {
-	// TODO: this is bad. write an actual redis repository
-	reops.redis = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
-
 	return &API{
 		repositories: reops,
 	}

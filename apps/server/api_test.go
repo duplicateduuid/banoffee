@@ -72,7 +72,7 @@ func buildQueryParams(path string, params map[string]string) string {
 		query = append(query, parameter)
 	}
 
-	return path + strings.Join(query, "&")
+	return path + "?" + strings.Join(query, "&")
 }
 
 func (r testRouter) get(path string, params map[string]string) *httptest.ResponseRecorder {

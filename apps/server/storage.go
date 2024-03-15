@@ -42,7 +42,7 @@ type ResourcePostgresRepository struct {
 	db *sqlx.DB
 }
 
-func NewPostgresRepositories() Repositories {
+func NewRepositories() Repositories {
 	db, err := sqlx.Connect("postgres", "user=postgres dbname=banoffee password=5up3r_s3cur3_p4ssw0rd sslmode=disable")
 
 	if err != nil {
@@ -51,10 +51,17 @@ func NewPostgresRepositories() Repositories {
 
 	userRepo := UserPostgresRepository{db: db}
 	resourceRepo := ResourcePostgresRepository{db: db}
+	// TODO: this is bad. write an actual redis repository
+	redis := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
 
 	return Repositories{
 		userRepository:     userRepo,
 		resourceRepository: resourceRepo,
+		redis:              redis,
 	}
 }
 

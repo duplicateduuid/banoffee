@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +19,7 @@ func (a *API) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		userId, err := a.repositories.redis.Get(ctx, sessionId).Result()
+		userId, err := a.repositories.redis.Get(context.Background(), sessionId).Result()
 
 		if err != nil {
 			fmt.Printf("[ERROR] [AuthMiddleware] session(%s) not found on redis: %s\n", sessionId, err)

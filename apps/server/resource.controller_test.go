@@ -25,17 +25,18 @@ func TestResourceSearch(t *testing.T) {
 
 	repos := newTestRepositories(deleteResourceByUrl(resource.Url), t)
 	repos.resourceRepository.CreateResource(resource)
-	search := SearchResourceRequest{
-		Name: "Designing Data-Intensive Applications",
-	}
 
-	json_user, _ := json.Marshal(search)
 	router := newAuthTestRouter(repos, nil)
-	w := router.get("/resource/search", json_user)
+	query := map[string]string{
+		"name": resource.Name,
+	}
+	w := router.get("/resource/search", query)
+
+	resp := w.Body.String()
 
 	var actual Resource
-	_ = json.Unmarshal(w.Body.Bytes(), &actual)
+	json.Unmarshal([]byte(resp), &actual)
 
-	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, 200, w.Code, resp)
 	assert.Equal(t, resource.Url, actual.Url)
 }

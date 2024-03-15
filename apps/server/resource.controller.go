@@ -39,17 +39,13 @@ func (s *API) handleCreateResource() gin.HandlerFunc {
 }
 
 type SearchResourceRequest struct {
-	Name string `form:"name" validate:"min=5"`
+	Name string `json:"name" validate:"required" tstype:"string"`
 }
 
 func (s *API) handleSearchResource() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		req := SearchResourceRequest{}
-
-		if ctx.ShouldBindQuery(&req) != nil {
-			ctx.JSON(400, gin.H{"error": "invalid input"})
-			return
-		}
+		name := ctx.Query("name")
+		req := SearchResourceRequest{Name: name}
 
 		validate := validator.New()
 		err := validate.Struct(req)
