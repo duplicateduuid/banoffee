@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/google/uuid"
@@ -35,7 +36,7 @@ type ResourceRepository interface {
 	GetResourceByUrl(string) (*Resource, error)
 	GetResourceByName(name string) (*Resource, error)
 	GetUserResources(user *User, limit int, offset int) (*[]Resource, error)
-	SearchByName(name string) (*[]Resource, error)
+	SearchByName(name string, limit int, offset int) (*[]Resource, error)
 }
 
 type ResourcePostgresRepository struct {
@@ -284,29 +285,30 @@ func (r ResourcePostgresRepository) GetUserResources(user *User, limit int, offs
 	return resource, err
 }
 
-func (r ResourcePostgresRepository) SearchByName(name string) (*[]Resource, error) {
-	var resources []Resource
+func (r ResourcePostgresRepository) SearchByName(name string, limit int, offset int) (*[]Resource, error) {
+	resources := new([]Resource)
+	name = "%" + name + "%"
 
 	err := r.db.Select(
 		resources,
 		`
 		SELECT 
-			r.id, r.url, r.name, r.image_url, r.author, r.description, r.created_at
+		  r.id, r.url, r.name, r.image_url, r.author, r.description, r.created_at
 		FROM 
-			"resource" r 
-		LEFT JOIN 
-			"user_resource" ur ON ur.resource_id = r.id
-		WHERE
-			ur.user_id = $1
-		ORDER BY
-			r.created_at
+		  "resource" r
+		ORDER BY 
+			SIMILARITY(r.name, $1) DESC
 		LIMIT
 			$2
 		OFFSET
 			$3
 		`,
 		name,
+		limit,
+		offset,
 	)
 
-	return &resources, err
+	fmt.Printf("[INFO] [ResourcePostgresRepository.SearchByName] selected: %v\n", resources)
+
+	return resources, err
 }

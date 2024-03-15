@@ -28,14 +28,18 @@ func TestResourceSearch(t *testing.T) {
 
 	router := newAuthTestRouter(repos, nil)
 	query := map[string]string{
-		"name": resource.Name,
+		"name":   resource.Name,
+		"limit":  "10",
+		"offset": "0",
 	}
 	w := router.get("/resource/search", query)
 
-	resp := w.Body.String()
+	body := w.Body.String()
 
-	var actual Resource
-	json.Unmarshal([]byte(resp), &actual)
+	var resp SearchResourceResponse
+	json.Unmarshal([]byte(body), &resp)
+
+	actual := resp.Resources[0]
 
 	assert.Equal(t, 200, w.Code, resp)
 	assert.Equal(t, resource.Url, actual.Url)
