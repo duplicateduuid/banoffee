@@ -159,7 +159,7 @@ func (s *API) handleSaveResource() gin.HandlerFunc {
 
 		user := ctx.MustGet("user").(*User)
 
-		_, err := s.repositories.resourceRepository.GetResourceById(resourceId)
+		resource, err := s.repositories.resourceRepository.GetResourceById(resourceId)
 
 		if err != nil {
 			ctx.JSON(400, gin.H{"error": "Cannot retrieve resource"})
@@ -179,7 +179,14 @@ func (s *API) handleSaveResource() gin.HandlerFunc {
 
 			ctx.JSON(200, gin.H{"message": "Resource created with success"})
 		} else {
-			err = s.repositories.userRepository.UpdateUserResource(user, resourceId, req.Status, req.ReviewRating, req.ReviewComment)
+			newStatus := req.Status
+
+			if resource.Status == nil && req.Status == nil && req.ReviewRating != nil {
+				updatedStatus := "ongoing"
+				newStatus = &updatedStatus
+			}
+
+			err = s.repositories.userRepository.UpdateUserResource(user, resourceId, newStatus, req.ReviewRating, req.ReviewComment)
 
 			if err != nil {
 				fmt.Println(err)

@@ -152,12 +152,19 @@ func (u UserPostgresRepository) GetUserResource(user *User, resourceId string) (
 }
 
 func (u UserPostgresRepository) CreateUserResource(user *User, resourceId string, status *string, review_rating *string, review_comment *string) error {
+	newStatus := status
+
+	if review_rating != nil && status == nil {
+		updatedStatus := "ongoing"
+		newStatus = &updatedStatus
+	}
+
 	_, err := u.db.Exec(
 		`INSERT INTO "user_resource" (user_id, resource_id, status, review_rating, review_comment)
 		VALUES ($1, $2, $3, $4, $5)`,
 		user.Id,
 		resourceId,
-		status,
+		newStatus,
 		review_rating,
 		review_comment,
 	)
