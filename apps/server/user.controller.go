@@ -105,3 +105,89 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 		ctx.JSON(200, gin.H{"message": "User created with success!"})
 	}
 }
+
+type GetMyResourcesPayload struct {
+	Limit  int `db:"limit" form:"limit"`
+	Offset int `db:"offset" form:"offset"`
+}
+
+func (s *API) handleGetMyResources() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		req := GetMyResourcesPayload{}
+
+		if ctx.ShouldBindQuery(&req) != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid input"})
+			return
+		}
+
+		user := ctx.MustGet("user").(*User)
+
+		resources, err := s.repositories.userRepository.GetUserResources(user, req.Limit, req.Offset)
+
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(400, gin.H{"error": "Cannot retrieve resources"})
+			return
+		}
+
+		if len(*resources) <= 0 {
+			ctx.JSON(200, gin.H{"resources": []*Resource{}})
+			return
+		}
+
+		ctx.JSON(200, gin.H{"resources": resources})
+	}
+}
+
+type SaveResourcePayload struct {
+	Status string `db:"status" json:"status"`
+}
+
+func (s *API) handleSaveResource() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		resourceId := ctx.Param("id")
+
+		if resourceId == "" {
+			ctx.JSON(400, gin.H{"error": "Invalid input"})
+			return
+		}
+
+		req := SaveResourcePayload{}
+
+		if ctx.ShouldBindJSON(&req) != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid input"})
+			return
+		}
+
+		user := ctx.MustGet("user").(*User)
+
+		_, err := s.repositories.resourceRepository.GetResourceById(resourceId)
+
+		if err != nil {
+			ctx.JSON(400, gin.H{"error": "Cannot retrieve resource"})
+			return
+		}
+
+		_, err = s.repositories.userRepository.GetUserResource(user, resourceId)
+
+		if err != nil {
+			err = s.repositories.userRepository.CreateUserResource(user, resourceId, req.Status)
+
+			if err != nil {
+				ctx.JSON(400, gin.H{"error": "Failed to create resource"})
+				return
+			}
+
+			ctx.JSON(200, gin.H{"message": "Resource created with success"})
+		} else {
+			err = s.repositories.userRepository.UpdateUserResource(user, resourceId, req.Status)
+
+			if err != nil {
+				ctx.JSON(400, gin.H{"error": "Failed to update resource"})
+				return
+			}
+
+			ctx.JSON(200, gin.H{"message": "Resource updated with success"})
+		}
+	}
+}

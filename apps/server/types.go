@@ -25,6 +25,7 @@ type Resource struct {
 	ImageUrl    *string   `db:"image_url" json:"image_url"`
 	Author      *string   `db:"author" json:"author"`
 	Description *string   `db:"description" json:"description"`
+	Status      *string   `db:"status" json:"status"`
 	CreatedAt   time.Time `db:"created_at" json:"created_at"`
 }
 

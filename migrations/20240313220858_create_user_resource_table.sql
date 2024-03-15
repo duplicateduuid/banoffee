@@ -1,7 +1,10 @@
+CREATE TYPE resource_status AS ENUM ('completed', 'ongoing', 'bookmarked');
+
 -- Add migration script here
 CREATE TABLE "user_resource" (
     user_id UUID,
     resource_id UUID,
+    status resource_status NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, resource_id),

@@ -91,36 +91,3 @@ func (s *API) handleGetResource() gin.HandlerFunc {
 		ctx.JSON(400, gin.H{"error": "Invalid input"})
 	}
 }
-
-type GetMyResourcesPayload struct {
-	Limit  int `db:"limit" form:"limit"`
-	Offset int `db:"offset" form:"offset"`
-}
-
-func (s *API) handleGetMyResources() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		req := GetMyResourcesPayload{}
-
-		if ctx.ShouldBindQuery(&req) != nil {
-			ctx.JSON(400, gin.H{"error": "Invalid input"})
-			return
-		}
-
-		user := ctx.MustGet("user").(*User)
-
-		resources, err := s.repositories.resourceRepository.GetUserResources(user, req.Limit, req.Offset)
-
-		if err != nil {
-			fmt.Println(err)
-			ctx.JSON(400, gin.H{"error": "Cannot retrieve resources"})
-			return
-		}
-
-		if len(*resources) <= 0 {
-			ctx.JSON(200, gin.H{"resources": []*Resource{}})
-			return
-		}
-
-		ctx.JSON(200, gin.H{"resources": resources})
-	}
-}
