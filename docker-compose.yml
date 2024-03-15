@@ -1,13 +1,14 @@
 services:
   redis:
     image: redis
+    container_name: redis
     command: redis-server
     ports:
       - "6379:6379"
   
   db:
     image: postgres:latest
-    container_name: banoffee
+    container_name: postgres
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -19,9 +20,16 @@ services:
     ports:
       - "5432:5432"
 
-  testing_db:
+  test_redis:
+    image: redis
+    container_name: redis_testk
+    command: redis-server
+    ports:
+      - "6380:6379"
+
+  test_db:
     image: postgres:latest
-    container_name: banoffee_test
+    container_name: postgres_test
     restart: unless-stopped
     volumes:
       - ./migrations:/docker-entrypoint-initdb.d/

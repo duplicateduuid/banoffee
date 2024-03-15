@@ -8,25 +8,24 @@ import (
 
 type API struct {
 	repositories Repositories
-	redis        *redis.Client
 }
 
-func NewAPI(repositories Repositories) *API {
-	redis := redis.NewClient(&redis.Options{
+func NewAPI(reops Repositories) *API {
+	// TODO: this is bad. write an actual redis repository
+	reops.redis = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
 
 	return &API{
-		repositories: repositories,
-		redis:        redis,
+		repositories: reops,
 	}
 }
 
 func (a *API) SetupRouter() *gin.Engine {
 	router := gin.Default()
-	authRouter := router.Group("/").Use(AuthMiddleware(a.repositories.userRepository, a.redis))
+	authRouter := router.Group("/").Use(a.AuthMiddleware())
 
 	router.GET("/health-check", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })
 	router.POST("/login", a.handleLogin())
@@ -34,7 +33,9 @@ func (a *API) SetupRouter() *gin.Engine {
 
 	authRouter.GET("/resource", a.handleGetResource())
 	authRouter.POST("/resource", a.handleCreateResource())
-	authRouter.GET("/resources", a.handleGetMyResources())
+	authRouter.GET("/resource/search", a.handleSearchResource())
+
+	authRouter.GET("/user/resource", a.handleGetMyResources())
 
 	return router
 }

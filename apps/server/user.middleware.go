@@ -1,24 +1,27 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
 )
 
-func AuthMiddleware(repo UserRepository, rdb *redis.Client) gin.HandlerFunc {
+func (a *API) AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sessionId, err := ctx.Cookie("sessionId")
 
 		if err != nil {
+			fmt.Printf("[ERROR] [AuthMiddleware] failed to get session id from cookies: %s\n", err)
 			ctx.JSON(401, gin.H{"message": "Unauthorized"})
 			ctx.Abort()
 			return
 		}
 
-		userId, err := rdb.Get(ctx, sessionId).Result()
+		userId, err := a.repositories.redis.Get(ctx, sessionId).Result()
 
 		if err != nil {
+			fmt.Printf("[ERROR] [AuthMiddleware] session(%s) not found on redis: %s\n", sessionId, err)
 			ctx.JSON(401, gin.H{"message": "Unauthorized"})
 			ctx.Abort()
 			return
@@ -27,14 +30,16 @@ func AuthMiddleware(repo UserRepository, rdb *redis.Client) gin.HandlerFunc {
 		id, err := uuid.Parse(userId)
 
 		if err != nil {
+			fmt.Printf("[ERROR] [AuthMiddleware] failed to parse user id: %s\n", err)
 			ctx.JSON(401, gin.H{"message": "Unauthorized"})
 			ctx.Abort()
 			return
 		}
 
-		user, err := repo.GetUserById(id)
+		user, err := a.repositories.userRepository.GetUserById(id)
 
 		if err != nil {
+			fmt.Printf("[ERROR] [AuthMiddleware] failed to fetch user: %s\n", err)
 			ctx.JSON(401, gin.H{"message": "Unauthorized"})
 			ctx.Abort()
 			return

@@ -44,7 +44,7 @@ func (s *API) handleLogin() gin.HandlerFunc {
 		}
 
 		session_id := uuid.New().String()
-		err = s.redis.Set(ctx, session_id, user.Id.String(), 0).Err()
+		err = s.repositories.redis.Set(ctx, session_id, user.Id.String(), 0).Err()
 		if err != nil {
 			fmt.Println(err)
 			ctx.JSON(400, gin.H{"error": "Unexpected error"})

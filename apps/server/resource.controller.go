@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type CreateResourcePayload struct {
@@ -34,6 +35,37 @@ func (s *API) handleCreateResource() gin.HandlerFunc {
 		}
 
 		ctx.JSON(200, gin.H{"message": "Resource created with success!"})
+	}
+}
+
+type SearchResourceRequest struct {
+	Name string `form:"name" validate:"min=5"`
+}
+
+func (s *API) handleSearchResource() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		req := SearchResourceRequest{}
+
+		if ctx.ShouldBindQuery(&req) != nil {
+			ctx.JSON(400, gin.H{"error": "invalid input"})
+			return
+		}
+
+		validate := validator.New()
+		err := validate.Struct(req)
+		if err != nil {
+			errors := err.(validator.ValidationErrors)
+			ctx.JSON(400, gin.H{"error": fmt.Sprintf("valiadtion errors: %s", errors)})
+			return
+		}
+
+		resources, err := s.repositories.resourceRepository.SearchByName(req.Name)
+		if err != nil {
+			ctx.JSON(400, gin.H{"error": "failed to search resources"})
+			return
+		}
+
+		ctx.JSON(200, gin.H{"resources": resources})
 	}
 }
 
@@ -103,6 +135,7 @@ func (s *API) handleGetMyResources() gin.HandlerFunc {
 
 		if ctx.ShouldBindQuery(&req) != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid input"})
+			ctx.Abort()
 			return
 		}
 
@@ -113,11 +146,13 @@ func (s *API) handleGetMyResources() gin.HandlerFunc {
 		if err != nil {
 			fmt.Println(err)
 			ctx.JSON(400, gin.H{"error": "Cannot retrieve resources"})
+			ctx.Abort()
 			return
 		}
 
 		if len(*resources) <= 0 {
 			ctx.JSON(200, gin.H{"resources": []*Resource{}})
+			ctx.Abort()
 			return
 		}
 
