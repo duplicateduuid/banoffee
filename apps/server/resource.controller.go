@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,6 @@ func (s *API) handleCreateResource() gin.HandlerFunc {
 		}
 
 		resource := NewResource(req.Url, req.Name, req.ImageUrl, req.Author, req.Description)
-
 		err := s.repositories.resourceRepository.CreateResource(resource)
 
 		if err != nil {
@@ -35,18 +35,18 @@ func (s *API) handleCreateResource() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(200, gin.H{"message": "Resource created with success!"})
+		ctx.Writer.WriteHeader(http.StatusNoContent)
 	}
 }
 
 type SearchResourceRequest struct {
 	Name   string `validate:"required" tstype:"string"`
-	Limit  int    `tstype:"int"`
-	Offset int    `tstype:"int"`
+	Limit  int    `tstype:"number"`
+	Offset int    `tstype:"number"`
 }
 
 type SearchResourceResponse struct {
-	Resources []Resource `json:"resources"`
+	Resources []Resource `json:"resources" tstype:"Resource"`
 }
 
 func (s *API) handleSearchResource() gin.HandlerFunc {
