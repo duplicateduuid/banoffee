@@ -9,8 +9,8 @@ import (
 )
 
 type LoginPayload struct {
-	Email    string `db:"email" json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8,max=255"`
+	Email    string `db:"email" json:"email" validate:"required,email" tstype:"string"`
+	Password string `json:"password" validate:"required,min=8,max=255" tstype:"string"`
 }
 
 func (s *API) handleLogin() gin.HandlerFunc {
@@ -57,12 +57,12 @@ func (s *API) handleLogin() gin.HandlerFunc {
 }
 
 type RegisterRequest struct {
-	Email     string  `json:"email" validate:"required,email"`
-	Username  string  `json:"username" validate:"required,min=5,max=20"`
-	Password  string  `json:"password" validate:"required,min=8,max=255"`
-	AvatarUrl *string `json:"avatar_url" validate:"omitempty,http_url"`
-	HeaderUrl *string `json:"header_url" validate:"omitempty,http_url"`
-	Bio       *string `json:"bio" validate:"omitempty,max=255"`
+	Email     string  `json:"email" validate:"required,email" tstype:"string"`
+	Username  string  `json:"username" validate:"required,min=5,max=20" tstype:"string"`
+	Password  string  `json:"password" validate:"required,min=8,max=255" tstype:"string"`
+	AvatarUrl *string `json:"avatar_url" validate:"omitempty,http_url" tstype:"string | null"`
+	HeaderUrl *string `json:"header_url" validate:"omitempty,http_url" tstype:"string | null"`
+	Bio       *string `json:"bio" validate:"omitempty,max=255" tstype:"string | null"`
 }
 
 func (s *API) hanlderRegister() gin.HandlerFunc {
