@@ -7,7 +7,8 @@
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "dev:web": "cd apps/web && yarn dev",
-    "dev:server": "cd apps/server && go run ."
+    "dev:server": "cd apps/server && go run .",
+    "build:web-extension": "cd apps/extension/web-extension && yarn build"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
