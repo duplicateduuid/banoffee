@@ -8,14 +8,18 @@ import (
 	"github.com/google/uuid"
 )
 
-type LoginPayload struct {
+type LoginRequest struct {
 	Email    string `db:"email" json:"email" validate:"required,email" tstype:"string"`
 	Password string `json:"password" validate:"required,min=8,max=255" tstype:"string"`
 }
 
+type LoginResponse struct {
+	User *User `json:"user" tstype:"User"`
+}
+
 func (s *API) handleLogin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		req := LoginPayload{}
+		req := LoginRequest{}
 
 		if ctx.ShouldBindJSON(&req) != nil {
 			ctx.JSON(400, gin.H{"error": "Invalid input"})
@@ -28,31 +32,33 @@ func (s *API) handleLogin() gin.HandlerFunc {
 		if err != nil {
 			errors := err.(validator.ValidationErrors)
 			ctx.JSON(400, gin.H{"error": fmt.Sprintf("validation errors: %s", errors)})
+
 			return
 		}
 
-		// TODO: validate email
 		user, err := s.repositories.userRepository.GetUserByEmail(req.Email)
 		if err != nil {
-			ctx.JSON(400, gin.H{"error": "Invalid email or password"})
+			ctx.JSON(400, gin.H{"error": "invalid email or password"})
 			return
 		}
 
 		if user.ValidPassword(req.Password) {
-			ctx.JSON(400, gin.H{"error": "Invalid email or password"})
+			ctx.JSON(400, gin.H{"error": "invalid email or password"})
 			return
 		}
 
 		session_id := uuid.New().String()
 		err = s.repositories.redis.Set(ctx, session_id, user.Id.String(), 0).Err()
 		if err != nil {
-			fmt.Println(err)
-			ctx.JSON(400, gin.H{"error": "Unexpected error"})
+			fmt.Printf("[ERROR] [UserController.login] failed to set redis session: %s\n", err)
+			ctx.JSON(500, gin.H{"error": "unexpected error"})
 			return
 		}
 
 		ctx.SetCookie("sessionId", session_id, 3600*24, "/", "localhost", false, true)
-		ctx.JSON(200, gin.H{"user": user})
+
+		response := LoginResponse{User: user}
+		ctx.JSON(200, response)
 	}
 }
 
@@ -65,6 +71,10 @@ type RegisterRequest struct {
 	Bio       *string `json:"bio" validate:"omitempty,max=255" tstype:"string | null"`
 }
 
+type RegisterResponse struct {
+	User *User `json:"user" tstype:"User"`
+}
+
 func (s *API) hanlderRegister() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := RegisterRequest{}
@@ -73,7 +83,6 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 			ctx.JSON(400, gin.H{"error": "Invalid input"})
 			return
 		}
-		fmt.Printf("%v", req)
 
 		validate := validator.New()
 		err := validate.Struct(req)
@@ -86,19 +95,20 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 		user, err := NewUser(req.Email, req.Username, req.Password, req.AvatarUrl, req.HeaderUrl, req.Bio)
 
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("[ERROR] [UserController.register] failed to create user: %s", err)
 			ctx.JSON(500, gin.H{"error": "Failed to hash password"})
 			return
 		}
 
-		err = s.repositories.userRepository.CreateUser(user)
+		user, err = s.repositories.userRepository.CreateUser(user)
 		if err != nil {
-			fmt.Printf("[ERROR]: %v\n", err)
+			fmt.Printf("[ERROR] [UserController.register] failed to store user: %s\n", err)
 			ctx.JSON(400, gin.H{"error": "Cannot create user"})
 			return
 		}
 
-		ctx.JSON(200, gin.H{"message": "User created with success!"})
+		response := RegisterResponse{User: user}
+		ctx.JSON(200, response)
 	}
 }
 
@@ -135,11 +145,12 @@ func (s *API) handleSaveResource() gin.HandlerFunc {
 
 		_, err = s.repositories.userRepository.GetUserResource(user, resourceId)
 
+		// TODO: this is bad. Other errors besides the duplicated one can happen.
 		if err != nil {
 			err = s.repositories.userRepository.CreateUserResource(user, resourceId, req.Status, req.ReviewRating, req.ReviewComment)
 
 			if err != nil {
-				fmt.Println(err)
+				fmt.Printf("[ERROR] [UserController.saveResource] failed to create user resource: %s\n", err)
 				ctx.JSON(400, gin.H{"error": "Failed to create resource"})
 				return
 			}
@@ -156,7 +167,7 @@ func (s *API) handleSaveResource() gin.HandlerFunc {
 			err = s.repositories.userRepository.UpdateUserResource(user, resourceId, newStatus, req.ReviewRating, req.ReviewComment)
 
 			if err != nil {
-				fmt.Println(err)
+				fmt.Printf("[ERROR] [API.SaveResource] failed to update resource: %s\n", err)
 				ctx.JSON(400, gin.H{"error": "Failed to update resource"})
 				return
 			}
