@@ -17,7 +17,7 @@ type Repositories struct {
 }
 
 type UserRepository interface {
-	CreateUser(*User) error
+	CreateUser(*User) (*User, error)
 	GetUserById(uuid.UUID) (*User, error)
 	GetUserByEmail(string) (*User, error)
 	GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error)
@@ -95,7 +95,7 @@ func (u UserPostgresRepository) GetUserByEmail(email string) (*User, error) {
 	return user, err
 }
 
-func (u UserPostgresRepository) CreateUser(user *User) error {
+func (u UserPostgresRepository) CreateUser(user *User) (*User, error) {
 	_, err := u.db.Exec(
 		`INSERT INTO "user" (email, password, username)
 		VALUES ($1, $2, $3)`,
@@ -104,7 +104,11 @@ func (u UserPostgresRepository) CreateUser(user *User) error {
 		user.Username,
 	)
 
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	return u.GetUserByEmail(user.Email)
 }
 
 func (u UserPostgresRepository) GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error) {

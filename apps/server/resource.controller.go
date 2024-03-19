@@ -30,7 +30,7 @@ func (s *API) handleCreateResource() gin.HandlerFunc {
 		err := s.repositories.resourceRepository.CreateResource(resource)
 
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("[ERROR] [API.CreateResource] failed to fetch resources: %s", err)
 			ctx.JSON(400, gin.H{"error": "Cannot create resource"})
 			return
 		}
@@ -159,7 +159,7 @@ func (s *API) handleGetMyResources() gin.HandlerFunc {
 		resources, err := s.repositories.resourceRepository.GetUserResources(user, req.Limit, req.Offset)
 
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("[ERROR] [API.GetMyResources] failed to fetch resources: %s", err)
 			ctx.JSON(400, gin.H{"error": "Cannot retrieve resources"})
 			ctx.Abort()
 			return

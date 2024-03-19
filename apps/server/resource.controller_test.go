@@ -4,29 +4,47 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-func deleteResourceByUrl(url string) func(*sqlx.DB) {
-	return func(db *sqlx.DB) {
-		db.Exec(`DELETE FROM "resource" WHERE url = $1`, url)
+func testNewResource(t *testing.T, repos *Repositories) *Resource {
+	uuid := uuid.New().String()
+
+	resource := NewResource("http://"+uuid+"/", uuid, nil, nil, nil)
+	err := repos.resourceRepository.CreateResource(resource)
+
+	if err != nil {
+		t.Errorf("[ERROR] [testNewResource] failed to create resource: %s", err)
 	}
+
+	return resource
 }
 
-type searchResponse struct {
-	Resource Resource `json:"resource"`
+func TestCreateResource(t *testing.T) {
+	t.Parallel()
+
+	repos := newTestRepositories(t)
+
+	uuid := uuid.New().String()
+	resource := NewResource("http://"+uuid+"/", uuid, nil, nil, nil)
+	auth, _ := testNewUser(t, &repos)
+
+	router := newAuthTestRouter(t, repos, *auth)
+	w := router.post("/resource", resource)
+
+	assert.Equal(t, 204, w.Code, w.Body)
 }
 
 func TestResourceSearch(t *testing.T) {
 	t.Parallel()
 
-	resource := NewResource("http://example.com/", "Designing Data-Intensive Applications", nil, nil, nil)
+	repos := newTestRepositories(t)
 
-	repos := newTestRepositories(deleteResourceByUrl(resource.Url), t)
-	repos.resourceRepository.CreateResource(resource)
+	resource := testNewResource(t, &repos)
+	user, _ := testNewUser(t, &repos)
 
-	router := newAuthTestRouter(repos, nil)
+	router := newAuthTestRouter(t, repos, *user)
 	query := map[string]string{
 		"name":   resource.Name,
 		"limit":  "10",
