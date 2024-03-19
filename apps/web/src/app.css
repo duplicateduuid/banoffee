@@ -1,3 +1,13 @@
+@font-face {
+  font-family: 'Recia';
+  src: url(/fonts/recia.ttf);
+}
+
+@font-face {
+  font-family: 'Chubbo';
+  src: url(/fonts/chubbo.ttf);
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
