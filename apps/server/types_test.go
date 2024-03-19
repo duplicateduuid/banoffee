@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,5 +15,4 @@ func TestNewUser(t *testing.T) {
 	assert.Nil(t, user.AvatarUrl)
 	assert.Nil(t, user.HeaderUrl)
 	assert.Nil(t, user.Bio)
-	fmt.Printf("%+v\n", user)
 }
