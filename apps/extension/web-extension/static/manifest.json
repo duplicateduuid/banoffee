@@ -1,18 +1,44 @@
 {
-    "name": "Banoffee",
-    "description": "Banoffee is a social networking platform tailored for avid readers and knowledge seekers.",
-    "version": "1.0.0",
-    "manifest_version": 3,
-    "action": {
-      "default_title": "Banoffee",
-      "default_icon": "icon_128px.png",
-      "default_popup": "index.html"
-    },
-    "host_permissions": ["*://*/*"],
-	  "permissions": ["activeTab", "scripting", "storage", "cookie"],
-    "browser_specific_settings": {
-      "gecko": {
-        "id": "banoffee@domain.com"
-      }
+  "name": "Banoffee",
+  "description": "Banoffee is a social networking platform tailored for avid readers and knowledge seekers.",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "action": {
+    "default_title": "Banoffee",
+    "default_icon": "icon_128px.png",
+    "default_popup": "index.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost/*"
+      ],
+      "js": [
+        "loginListener.js"
+      ]
+    }
+  ],
+  "host_permissions": [
+    "*://*/*"
+  ],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "cookie",
+    "runtime",
+    "tabs"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "banoffee@domain.com"
     }
   }
+}
