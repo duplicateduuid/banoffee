@@ -8,7 +8,10 @@
   </section>
   <section class="flex flex-col items-center lg:items-start lg:ml-[100px] justify-center w-full w-full">
     <div class="flex flex-col gap-10 w-full max-w-[400px]">
-      <h1 class="font-primary font-bold text-primary-500 text-3xl">Sign in to Banoffee</h1>
+      <h1 class="font-primary font-semibold text-primary-500 text-3xl">
+        Sign in to
+        <span class="font-bold">Banoffee</span>
+      </h1>
       <div class="flex flex-col gap-8">
         <button class="border border-stone-200 hover:border-stone-300 text-stone-900 rounded-full py-3.5 text-center w-full font-semibold transition">
           Sign in with Google
@@ -42,7 +45,7 @@
         </div>
 
         <div class="flex flex-col gap-5 mt-2 items-center">
-          <button class="bg-primary-400 hover:bg-primary-300 text-white rounded-full py-3 text-center w-full font-primary font-semibold text-xl transition">
+          <button class="bg-primary-400 hover:bg-primary-300 text-white rounded-full py-3 text-center w-full font-primary font-bold text-xl transition">
             Login
           </button>
 

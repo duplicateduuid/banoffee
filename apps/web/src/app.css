@@ -1,11 +1,11 @@
 @font-face {
-  font-family: 'Recia';
-  src: url(/fonts/recia.ttf);
+  font-family: 'Satoshi';
+  src: url(/fonts/satoshi.ttf);
 }
 
 @font-face {
-  font-family: 'Chubbo';
-  src: url(/fonts/chubbo.ttf);
+  font-family: 'Cabinet';
+  src: url(/fonts/cabinet.ttf);
 }
 
 @tailwind base;

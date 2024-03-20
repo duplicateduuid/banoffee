@@ -19,8 +19,8 @@ export default {
         },
       },
       fontFamily: {
-        primary: ['Chubbo'],
-        secondary: ['Recia']
+        primary: ['Cabinet'],
+        secondary: ['Satoshi']
       }
     },
   },
