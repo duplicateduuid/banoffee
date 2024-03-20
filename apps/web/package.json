@@ -37,6 +37,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@tailwindcss/line-clamp": "^0.4.4",
 		"lucide-svelte": "^0.359.0"
 	}
 }
