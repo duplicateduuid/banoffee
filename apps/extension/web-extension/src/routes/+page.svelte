@@ -124,8 +124,10 @@
 
       <button
         class="w-full h-12 rounded-md border-none bg-[#4e473b] text-[#F7F6F1] text-base inline-block"
-        on:click={handleSaveResource}>Bookmark</button
+        on:click={handleSaveResource}
       >
+        Bookmark
+      </button>
     </div>
   {/if}
 </div>
