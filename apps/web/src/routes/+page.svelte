@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { MoveRight } from 'lucide-svelte';
+	import { superForm } from 'sveltekit-superforms';
 
-	import type { PageData } from './$types';
 	import LoginDialog from './LoginDialog.svelte';
 
-	export let data: PageData;
+	export let data;
+
+	const { form } = superForm(data.form);
 </script>
 
 <svelte:head>
@@ -25,7 +27,7 @@
 					</div>
 					<a href="/bookmarks" class="text-2xl text-[#7A7974]">Bookmarks</a>
 				</div>
-				<LoginDialog />
+				<LoginDialog form={form} />
 			</header>
 
 			<section class="flex flex-col gap-8">

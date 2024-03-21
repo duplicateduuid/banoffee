@@ -25,7 +25,7 @@
   class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-3
   font-medium leading-none text-magnum-700 shadow hover:opacity-75"
 >
-  Open Dialog
+  Sign in
 </button>
 
 <div class="" use:melt={$portalled}>
@@ -47,7 +47,7 @@
       >
         <X size=20 />
       </button>
-      <form class="flex flex-col items-center w-full gap-8 pt-8 pb-6">
+      <form method="POST" action="/sign-in" class="flex flex-col items-center w-full gap-8 pt-8 pb-6">
         <h2 use:melt={$title} class="font-bold font-primary text-3xl w-full px-8">
           Welcome back!
         </h2>
