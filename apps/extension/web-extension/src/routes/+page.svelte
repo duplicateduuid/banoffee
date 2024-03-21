@@ -1,4 +1,6 @@
 <script lang="ts">
+  import icon from '../../static/icon_128px.png';
+
   let loading: boolean = $state(true);
 
   // TODO: test it on firefox
@@ -40,11 +42,18 @@
 
   {#if !loading}
     <div class="min-w-[30em] min-h-[20em] flex flex-col justify-between p-8">
-      <h1>Logo</h1>
+      <div class="w-full h-full flex items-center gap-2">
+        <img src={icon} alt="Banoffee Icon" class="rounded-full w-8 h-8" />
 
-      <h1>Title</h1>
+        <p class="text-lg font-semibold">Banoffee</p>
+      </div>
 
-      <h1>Bookmark</h1>
+      <div class="flex flex-col gap-[2px]">
+        <p class="text-sm font-normal">Title:</p>
+        <p class="text-base text-ellipsis font-medium">Designing Data-Intensive</p>
+      </div>
+
+      <button class="w-full h-12 rounded-md border-none bg-[#4e473b] text-[#F7F6F1] text-base inline-block">Bookmark</button>
     </div>
   {/if}
 </div>
