@@ -10,7 +10,8 @@
         if (data.sessionId) {
           loading = false;
         } else {
-          // Handle not logged in user
+          // TODO: replace mocked URL
+          chrome.tabs.create({"url": "http://localhost:3000/extension-login"});
         }
       });
     } else if (typeof browser !== "undefined") {
@@ -18,7 +19,8 @@
         if (data.sessionId) {
           loading = false;
         } else {
-          // Handle not logged in user
+          // TODO: replace mocked URL
+          browser.tabs.create({"url": "http://localhost:3000/extension-login"});
         }
       });
     }
