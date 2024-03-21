@@ -1,26 +1,35 @@
 <script lang="ts">
-  import icon from '../../static/icon_128px.png';
+  import icon from "../../static/icon_128px.png";
 
   let loading: boolean = $state(true);
+  let title: string | null = $state(null);
 
   // TODO: test it on firefox
   $effect(() => {
     if (typeof chrome !== "undefined") {
       chrome.storage.local.get("sessionId", (data) => {
         if (data.sessionId) {
+          chrome.tabs.query({ active: true }, (tabs) => {
+            title = tabs[0].title || null;
+          });
+
           loading = false;
         } else {
           // TODO: replace mocked URL
-          chrome.tabs.create({"url": "http://localhost:3000/extension-login"});
+          chrome.tabs.create({ url: "http://localhost:3000/extension-login" });
         }
       });
     } else if (typeof browser !== "undefined") {
       browser.storage.local.get("sessionId", (data) => {
         if (data.sessionId) {
+          browser.tabs.query({ active: true }, (tabs) => {
+            title = tabs[0].title || null;
+          });
+
           loading = false;
         } else {
           // TODO: replace mocked URL
-          browser.tabs.create({"url": "http://localhost:3000/extension-login"});
+          browser.tabs.create({ url: "http://localhost:3000/extension-login" });
         }
       });
     }
@@ -50,12 +59,17 @@
         <p class="text-lg font-semibold">Banoffee</p>
       </div>
 
-      <div class="flex flex-col gap-[2px]">
+      <div class="max-w-full flex flex-col gap-[2px] text-ellipsis whitespace-nowrap overflow-hidden">
         <p class="text-sm font-normal">Title:</p>
-        <p class="text-base text-ellipsis font-medium">Designing Data-Intensive</p>
+        <p class="text-base text-ellipsis whitespace-nowrap overflow-hidden font-medium">
+          {title || 'Unknown title'}
+        </p>
       </div>
 
-      <button class="w-full h-12 rounded-md border-none bg-[#4e473b] text-[#F7F6F1] text-base inline-block">Bookmark</button>
+      <button
+        class="w-full h-12 rounded-md border-none bg-[#4e473b] text-[#F7F6F1] text-base inline-block"
+        >Bookmark</button
+      >
     </div>
   {/if}
 </div>
