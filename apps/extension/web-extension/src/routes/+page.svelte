@@ -1,38 +1,82 @@
 <script lang="ts">
+  import { api } from "$lib";
+  import type { Resource } from "../types";
+  import { getBrowserEnv } from "../utils/getBrowserEnv";
   import icon from "../../static/icon_128px.png";
 
+  let browserEnv = getBrowserEnv();
   let loading: boolean = $state(true);
+  let url: string | null = $state(null);
   let title: string | null = $state(null);
+  let resourceId: string | null = $state(null);
+  let userHolds: boolean = $state(false);
+
+  const _handleSaveResource = async () => {
+    try {
+      if (resourceId) {
+        // TODO: handle case of the user already has the resource saved
+        if (userHolds) return;
+
+        await api.post(`/user/resource/${resourceId}`);
+        return;
+      }
+
+      const {
+        data: { resource: newResource },
+      } = await api.post<{ resource: Resource }>("/resource", {
+        url,
+        name: title,
+      });
+
+      await api.post(`/user/resource/${newResource.id}`);
+    } catch (err) {
+      throw new Error("Unexpected error calling the API");
+    }
+  };
 
   // TODO: test it on firefox
   $effect(() => {
-    if (typeof chrome !== "undefined") {
-      chrome.storage.local.get("sessionId", (data) => {
-        if (data.sessionId) {
-          chrome.tabs.query({ active: true }, (tabs) => {
-            title = tabs[0].title || null;
-          });
+    browserEnv.storage.local.get("sessionId", (data) => {
+      if (data.sessionId) {
+        (async () => {
+          try {
+            browser.tabs.query({ active: true }, async (tabs) => {
+              const currentTab = tabs?.[0];
 
-          loading = false;
-        } else {
-          // TODO: replace mocked URL
-          chrome.tabs.create({ url: `${import.meta.env.VITE_WEB_PAGE_URL}/extension-login` });
-        }
-      });
-    } else if (typeof browser !== "undefined") {
-      browser.storage.local.get("sessionId", (data) => {
-        if (data.sessionId) {
-          browser.tabs.query({ active: true }, (tabs) => {
-            title = tabs[0].title || null;
-          });
+              if (currentTab.url) {
+                const {
+                  data: { resource, user_holds },
+                } = await api.get<{
+                  resource: Resource | null;
+                  user_holds?: boolean;
+                }>(`/resource?url${currentTab.url}`);
 
+                if (resource) {
+                  url = resource.url;
+                  title = resource.name;
+                  resourceId = resource.id;
+                  userHolds = user_holds || false;
+
+                  return;
+                }
+
+                url = currentTab.url;
+                title = currentTab.title || null;
+              }
+            });
+          } catch (err) {
+            throw new Error("Unexpected error calling the API");
+          }
+        })().then(() => {
           loading = false;
-        } else {
-          // TODO: replace mocked URL
-          browser.tabs.create({ url: `${import.meta.env.VITE_WEB_PAGE_URL}/extension-login` });
-        }
-      });
-    }
+        });
+      } else {
+        // TODO: replace mocked URL
+        browserEnv.tabs.create({
+          url: `${import.meta.env.VITE_WEB_PAGE_URL}/extension-login`,
+        });
+      }
+    });
   });
 </script>
 
@@ -59,10 +103,14 @@
         <p class="text-lg font-semibold">Banoffee</p>
       </div>
 
-      <div class="max-w-full flex flex-col gap-[2px] text-ellipsis whitespace-nowrap overflow-hidden">
+      <div
+        class="max-w-full flex flex-col gap-[2px] text-ellipsis whitespace-nowrap overflow-hidden"
+      >
         <p class="text-sm font-normal">Title:</p>
-        <p class="text-base text-ellipsis whitespace-nowrap overflow-hidden font-medium">
-          {title || 'Unknown title'}
+        <p
+          class="text-base text-ellipsis whitespace-nowrap overflow-hidden font-medium"
+        >
+          {title || "Unknown title"}
         </p>
       </div>
 
