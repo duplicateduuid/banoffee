@@ -213,12 +213,22 @@ func (s *API) handleGetMyResources() gin.HandlerFunc {
 	}
 }
 
+type GetMyResourcePayload struct {
+	Url string `db:"url" form:"url"`
+}
+
 // TODO: handle possible errors here instead of just return null for all error cases
 func (s *API) handleGetMyResource() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		resourceId := ctx.Param("id")
+		req := GetMyResourcePayload{}
 
-		resource, err := s.repositories.resourceRepository.GetResourceById(resourceId)
+		if ctx.ShouldBindQuery(&req) != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid URL"})
+			ctx.Abort()
+			return
+		}
+
+		resource, err := s.repositories.resourceRepository.GetResourceByUrl(req.Url)
 
 		if err != nil {
 			ctx.JSON(200, gin.H{"resource": nil})
@@ -227,7 +237,7 @@ func (s *API) handleGetMyResource() gin.HandlerFunc {
 
 		user := ctx.MustGet("user").(*User)
 
-		_, err = s.repositories.userRepository.GetUserResource(user, resourceId)
+		_, err = s.repositories.userRepository.GetUserResource(user, resource.Id.String())
 
 		if err != nil {
 			ctx.JSON(200, gin.H{"resource": resource, "user_holds": false})

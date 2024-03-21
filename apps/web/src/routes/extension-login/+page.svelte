@@ -13,7 +13,7 @@
 
         const sessionId = cookies['sessionId'];
 
-        document.dispatchEvent(new CustomEvent('loginAttempt', { detail: { sessionId } }));
+        document.dispatchEvent(new CustomEvent('loginAttempt', { detail: { sessionId, expiration: 3600*24 } }));
     };
 </script>
 
