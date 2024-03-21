@@ -11,13 +11,13 @@
   let resourceId: string | null = $state(null);
   let userHolds: boolean = $state(false);
 
-  const _handleSaveResource = async () => {
+  const handleSaveResource = async () => {
     try {
       if (resourceId) {
         // TODO: handle case of the user already has the resource saved
         if (userHolds) return;
 
-        await api.post(`/user/resource/${resourceId}`);
+        await api.post(`/user/resource/${resourceId}`, { status: "bookmarked" });
         return;
       }
 
@@ -28,7 +28,7 @@
         name: title,
       });
 
-      await api.post(`/user/resource/${newResource.id}`);
+      await api.post(`/user/resource/${newResource.id}`, { status: "bookmarked" });
     } catch (err) {
       throw new Error(
         `Unexpected error calling the API: ${JSON.stringify(err)}`
@@ -124,7 +124,7 @@
 
       <button
         class="w-full h-12 rounded-md border-none bg-[#4e473b] text-[#F7F6F1] text-base inline-block"
-        >Bookmark</button
+        on:click={handleSaveResource}>Bookmark</button
       >
     </div>
   {/if}
