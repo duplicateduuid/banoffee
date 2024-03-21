@@ -15,8 +15,28 @@ func NewAPI(reops Repositories) *API {
 	}
 }
 
+func CorsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// TODO: use .env for origins
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func (a *API) SetupRouter() *gin.Engine {
 	router := gin.Default()
+
+	router.Use(CorsMiddleware())
+
 	authRouter := router.Group("/").Use(a.AuthMiddleware())
 
 	router.GET("/health-check", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })

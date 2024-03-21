@@ -1,6 +1,19 @@
 <script lang="ts">
-    const handleLogin = () => {
-        document.dispatchEvent(new CustomEvent('loginAttempt', { detail: { sessionId: '123' } }));
+	import { api } from "../../api";
+	import { getCookies } from "../../utils";
+
+    // TODO: remove mocked values
+    const handleLogin = async () => {
+        await api.post('/login', {
+            email: "email@test.com",
+            password: "test1234"
+        });
+
+        const cookies = getCookies(document.cookie);
+
+        const sessionId = cookies['sessionId'];
+
+        document.dispatchEvent(new CustomEvent('loginAttempt', { detail: { sessionId } }));
     };
 </script>
 
