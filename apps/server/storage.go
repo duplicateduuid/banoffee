@@ -20,8 +20,8 @@ type UserRepository interface {
 	CreateUser(*User) (*User, error)
 	GetUserById(uuid.UUID) (*User, error)
 	GetUserByEmail(string) (*User, error)
-	GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error)
 	GetUserResource(user *User, resourceId string) (*Resource, error)
+	GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error)
 	CreateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
 	UpdateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
 }
@@ -31,7 +31,7 @@ type UserPostgresRepository struct {
 }
 
 type ResourceRepository interface {
-	CreateResource(*Resource) error
+	CreateResource(*Resource) (*Resource, error)
 	GetResourceById(string) (*Resource, error)
 	GetResourceByUrl(string) (*Resource, error)
 	GetResourceByName(name string) (*Resource, error)
@@ -111,6 +111,29 @@ func (u UserPostgresRepository) CreateUser(user *User) (*User, error) {
 	return u.GetUserByEmail(user.Email)
 }
 
+func (u UserPostgresRepository) GetUserResource(user *User, resourceId string) (*Resource, error) {
+	resource := new(Resource)
+
+	err := u.db.Get(
+		resource,
+		`
+		SELECT 
+			r.id, r.url, r.name, r.image_url, r.author, r.description, ur.status, ur.review_rating, ur.review_comment, r.created_at
+		FROM 
+			"user_resource" ur 
+		LEFT JOIN 
+			"resource" r ON r.id = ur.resource_id
+		WHERE
+			ur.user_id = $1
+			AND ur.resource_id = $2
+		`,
+		user.Id,
+		resourceId,
+	)
+
+	return resource, err
+}
+
 func (u UserPostgresRepository) GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error) {
 	resource := new([]Resource)
 
@@ -139,29 +162,6 @@ func (u UserPostgresRepository) GetUserResources(user *User, limit int, offset i
 		offset,
 		status,
 		reviewRating,
-	)
-
-	return resource, err
-}
-
-func (u UserPostgresRepository) GetUserResource(user *User, resourceId string) (*Resource, error) {
-	resource := new(Resource)
-
-	err := u.db.Get(
-		resource,
-		`
-		SELECT 
-			r.id, r.url, r.name, r.image_url, r.author, r.description, ur.status, ur.review_rating, ur.review_comment, r.created_at
-		FROM 
-			"resource" r 
-		LEFT JOIN 
-			"user_resource" ur ON ur.resource_id = r.id
-		WHERE
-			ur.user_id = $1
-			AND r.id = $2
-		`,
-		user.Id,
-		resourceId,
 	)
 
 	return resource, err
@@ -210,7 +210,7 @@ func (u UserPostgresRepository) UpdateUserResource(user *User, resourceId string
 	return err
 }
 
-func (r ResourcePostgresRepository) CreateResource(resource *Resource) error {
+func (r ResourcePostgresRepository) CreateResource(resource *Resource) (*Resource, error) {
 	_, err := r.db.Exec(
 		`INSERT INTO "resource" (url, name, image_url, author, description)
 		VALUES ($1, $2, $3, $4, $5)`,
@@ -221,7 +221,11 @@ func (r ResourcePostgresRepository) CreateResource(resource *Resource) error {
 		resource.Description,
 	)
 
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	return r.GetResourceByUrl(resource.Url)
 }
 
 func (r ResourcePostgresRepository) GetResourceById(id string) (*Resource, error) {

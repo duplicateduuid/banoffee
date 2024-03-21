@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +26,7 @@ func (s *API) handleCreateResource() gin.HandlerFunc {
 		}
 
 		resource := NewResource(req.Url, req.Name, req.ImageUrl, req.Author, req.Description)
-		err := s.repositories.resourceRepository.CreateResource(resource)
+		resource, err := s.repositories.resourceRepository.CreateResource(resource)
 
 		if err != nil {
 			fmt.Printf("[ERROR] [API.CreateResource] failed to fetch resources: %s", err)
@@ -35,7 +34,7 @@ func (s *API) handleCreateResource() gin.HandlerFunc {
 			return
 		}
 
-		ctx.Writer.WriteHeader(http.StatusNoContent)
+		ctx.JSON(200, gin.H{"resource": resource})
 	}
 }
 
@@ -136,41 +135,5 @@ func (s *API) handleGetResource() gin.HandlerFunc {
 		}
 
 		ctx.JSON(400, gin.H{"error": "Invalid input"})
-	}
-}
-
-type GetMyResourcesPayload struct {
-	Limit  int `db:"limit" form:"limit"`
-	Offset int `db:"offset" form:"offset"`
-}
-
-func (s *API) handleGetMyResources() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		req := GetMyResourcesPayload{}
-
-		if ctx.ShouldBindQuery(&req) != nil {
-			ctx.JSON(400, gin.H{"error": "Invalid input"})
-			ctx.Abort()
-			return
-		}
-
-		user := ctx.MustGet("user").(*User)
-
-		resources, err := s.repositories.resourceRepository.GetUserResources(user, req.Limit, req.Offset)
-
-		if err != nil {
-			fmt.Printf("[ERROR] [API.GetMyResources] failed to fetch resources: %s", err)
-			ctx.JSON(400, gin.H{"error": "Cannot retrieve resources"})
-			ctx.Abort()
-			return
-		}
-
-		if len(*resources) <= 0 {
-			ctx.JSON(200, gin.H{"resources": []*Resource{}})
-			ctx.Abort()
-			return
-		}
-
-		ctx.JSON(200, gin.H{"resources": resources})
 	}
 }
