@@ -55,7 +55,7 @@ func (s *API) handleLogin() gin.HandlerFunc {
 			return
 		}
 
-		ctx.SetCookie("sessionId", session_id, 3600*24, "/", "localhost", false, true)
+		ctx.SetCookie("sessionId", session_id, 3600*24, "/", "localhost", false, false)
 
 		response := LoginResponse{User: user}
 		ctx.JSON(200, response)
@@ -174,5 +174,66 @@ func (s *API) handleSaveResource() gin.HandlerFunc {
 
 			ctx.JSON(200, gin.H{"message": "Resource updated with success"})
 		}
+	}
+}
+
+type GetMyResourcesPayload struct {
+	Limit  int `db:"limit" form:"limit"`
+	Offset int `db:"offset" form:"offset"`
+}
+
+func (s *API) handleGetMyResources() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		req := GetMyResourcesPayload{}
+
+		if ctx.ShouldBindQuery(&req) != nil {
+			ctx.JSON(400, gin.H{"error": "Invalid input"})
+			ctx.Abort()
+			return
+		}
+
+		user := ctx.MustGet("user").(*User)
+
+		resources, err := s.repositories.resourceRepository.GetUserResources(user, req.Limit, req.Offset)
+
+		if err != nil {
+			fmt.Printf("[ERROR] [API.GetMyResources] failed to fetch resources: %s", err)
+			ctx.JSON(400, gin.H{"error": "Cannot retrieve resources"})
+			ctx.Abort()
+			return
+		}
+
+		if len(*resources) <= 0 {
+			ctx.JSON(200, gin.H{"resources": []*Resource{}})
+			ctx.Abort()
+			return
+		}
+
+		ctx.JSON(200, gin.H{"resources": resources})
+	}
+}
+
+// TODO: handle possible errors here instead of just return null for all error cases
+func (s *API) handleGetMyResource() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		resourceId := ctx.Param("id")
+
+		resource, err := s.repositories.resourceRepository.GetResourceById(resourceId)
+
+		if err != nil {
+			ctx.JSON(200, gin.H{"resource": nil})
+			return
+		}
+
+		user := ctx.MustGet("user").(*User)
+
+		_, err = s.repositories.userRepository.GetUserResource(user, resourceId)
+
+		if err != nil {
+			ctx.JSON(200, gin.H{"resource": resource, "user_holds": false})
+			return
+		}
+
+		ctx.JSON(200, gin.H{"resource": resource, "user_holds": true})
 	}
 }
