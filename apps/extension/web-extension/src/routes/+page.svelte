@@ -16,7 +16,7 @@
           loading = false;
         } else {
           // TODO: replace mocked URL
-          chrome.tabs.create({ url: "http://localhost:3000/extension-login" });
+          chrome.tabs.create({ url: `${import.meta.env.VITE_WEB_PAGE_URL}/extension-login` });
         }
       });
     } else if (typeof browser !== "undefined") {
@@ -29,7 +29,7 @@
           loading = false;
         } else {
           // TODO: replace mocked URL
-          browser.tabs.create({ url: "http://localhost:3000/extension-login" });
+          browser.tabs.create({ url: `${import.meta.env.VITE_WEB_PAGE_URL}/extension-login` });
         }
       });
     }

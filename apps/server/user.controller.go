@@ -55,7 +55,7 @@ func (s *API) handleLogin() gin.HandlerFunc {
 			return
 		}
 
-		ctx.SetCookie("sessionId", session_id, 3600*24, "/", "localhost", false, true)
+		ctx.SetCookie("sessionId", session_id, 3600*24, "/", "localhost", false, false)
 
 		response := LoginResponse{User: user}
 		ctx.JSON(200, response)
