@@ -1,3 +1,12 @@
+<script lang="ts">
+  import { superForm } from "sveltekit-superforms"
+  import SuperDebug from "sveltekit-superforms";
+
+  export let data;
+
+  const { form } = superForm(data.form)
+</script>
+
 <svelte:head>
   <title>Sign in</title>
 </svelte:head>
@@ -12,7 +21,7 @@
         Sign in to
         <span class="font-bold">Banoffee</span>
       </h1>
-      <div class="flex flex-col gap-8">
+      <form method="POST" class="flex flex-col gap-8">
         <button class="border border-stone-200 hover:border-stone-300 text-stone-900 rounded-full py-3.5 text-center w-full font-semibold transition">
           Sign in with Google
         </button>
@@ -28,6 +37,7 @@
             <input
               id="login"
               class="rounded-xl border border-stone-200 focus:border-primary-300 py-3 px-5 text-sm transition outline-none ring-primary-100/90 hover:ring-4 focus:ring-4"
+              bind:value={$form.login}
             />
           </div>
 
@@ -40,6 +50,7 @@
               id="password"
               class="rounded-xl border border-stone-200 focus:border-primary-300 py-3 px-5 text-sm transition outline-none ring-primary-100/90 hover:ring-4 focus:ring-4"
               type="password"
+              bind:value={$form.password}
             />
           </div>
         </div>
@@ -54,7 +65,7 @@
             <a class="underline" href="signup">Sign up</a>
           </p>
         </div>
-      </div>
+      </form>
     </div>
   </section>
 </div>

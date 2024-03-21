@@ -1,9 +1,14 @@
-<script>
+<script lang="ts">
 	import { MoveRight } from 'lucide-svelte';
+
+	import type { PageData } from './$types';
+	import LoginDialog from './LoginDialog.svelte';
+
+	export let data: PageData;
 </script>
 
 <svelte:head>
-	<title>Home</title>
+	<title>Banoffee</title>
 	<meta name="description" content="Home page" />
 </svelte:head>
 
@@ -20,10 +25,7 @@
 					</div>
 					<a href="/bookmarks" class="text-2xl text-[#7A7974]">Bookmarks</a>
 				</div>
-				<a href="/signin" class="flex items-center gap-6">
-					<span class="text-primary font-bold text-2xl">Sign in</span>
-					<MoveRight />
-				</a>
+				<LoginDialog />
 			</header>
 
 			<section class="flex flex-col gap-8">
