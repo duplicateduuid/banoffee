@@ -11,13 +11,13 @@
   let resourceId: string | null = $state(null);
   let userHolds: boolean = $state(false);
 
-  const _handleSaveResource = async () => {
+  const handleSaveResource = async () => {
     try {
       if (resourceId) {
         // TODO: handle case of the user already has the resource saved
         if (userHolds) return;
 
-        await api.post(`/user/resource/${resourceId}`);
+        await api.post(`/user/resource/${resourceId}`, { status: "bookmarked" });
         return;
       }
 
@@ -28,55 +28,63 @@
         name: title,
       });
 
-      await api.post(`/user/resource/${newResource.id}`);
+      await api.post(`/user/resource/${newResource.id}`, { status: "bookmarked" });
     } catch (err) {
-      throw new Error("Unexpected error calling the API");
+      throw new Error(
+        `Unexpected error calling the API: ${JSON.stringify(err)}`
+      );
     }
   };
 
   // TODO: test it on firefox
   $effect(() => {
-    browserEnv.storage.local.get("sessionId", (data) => {
-      if (data.sessionId) {
-        (async () => {
-          try {
-            browser.tabs.query({ active: true }, async (tabs) => {
-              const currentTab = tabs?.[0];
+    if (browserEnv) {
+      browserEnv.storage.local.get("session", (data) => {
+        if (data.session) {
+          browserEnv!.tabs.query({ active: true }, async (tabs) => {
+            const currentTab = tabs?.[0];
 
-              if (currentTab.url) {
-                const {
-                  data: { resource, user_holds },
-                } = await api.get<{
+            if (currentTab.url) {
+              api
+                .get<{
                   resource: Resource | null;
                   user_holds?: boolean;
-                }>(`/resource?url${currentTab.url}`);
+                }>(`/user/resource?url=${currentTab.url}`)
+                .then((res) => {
+                  const {
+                    data: { resource, user_holds },
+                  } = res;
 
-                if (resource) {
-                  url = resource.url;
-                  title = resource.name;
-                  resourceId = resource.id;
-                  userHolds = user_holds || false;
+                  if (resource) {
+                    url = resource.url;
+                    title = resource.name;
+                    resourceId = resource.id;
+                    userHolds = user_holds || false;
 
-                  return;
-                }
+                    loading = false;
+                    return;
+                  }
 
-                url = currentTab.url;
-                title = currentTab.title || null;
-              }
-            });
-          } catch (err) {
-            throw new Error("Unexpected error calling the API");
-          }
-        })().then(() => {
-          loading = false;
-        });
-      } else {
-        // TODO: replace mocked URL
-        browserEnv.tabs.create({
-          url: `${import.meta.env.VITE_WEB_PAGE_URL}/extension-login`,
-        });
-      }
-    });
+                  url = currentTab.url!;
+                  title = currentTab.title || null;
+
+                  loading = false;
+                })
+                .catch((err) => {
+                  throw new Error(
+                    `Unexpected error calling the API: ${JSON.stringify(err)}`
+                  );
+                });
+            }
+          });
+        } else {
+          // TODO: replace mocked URL
+          browserEnv!.tabs.create({
+            url: `${import.meta.env.VITE_WEB_PAGE_URL}/extension-login`,
+          });
+        }
+      });
+    }
   });
 </script>
 
@@ -116,8 +124,10 @@
 
       <button
         class="w-full h-12 rounded-md border-none bg-[#4e473b] text-[#F7F6F1] text-base inline-block"
-        >Bookmark</button
+        on:click={handleSaveResource}
       >
+        Bookmark
+      </button>
     </div>
   {/if}
 </div>
