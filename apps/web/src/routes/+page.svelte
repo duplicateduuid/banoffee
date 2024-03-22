@@ -3,10 +3,9 @@
 	import { superForm } from 'sveltekit-superforms';
 
 	import LoginDialog from './LoginDialog.svelte';
+	import type { PageData } from './$types';
 
-	export let data;
-
-	const { form } = superForm(data.form);
+	export let data: PageData;
 </script>
 
 <svelte:head>
@@ -27,7 +26,7 @@
 					</div>
 					<a href="/bookmarks" class="text-2xl text-[#7A7974]">Bookmarks</a>
 				</div>
-				<LoginDialog form={form} />
+				<LoginDialog />
 			</header>
 
 			<section class="flex flex-col gap-8">

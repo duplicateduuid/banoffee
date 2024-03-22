@@ -1,12 +1,11 @@
-// since there's no dynamic data here, we can prerender
-// it so that it gets served as a static asset in production
-export const prerender = true;
+import type { PageLoad } from "./$types";
 
-export const load = async ({ parent }) => {
-  const { user } = await parent();
+export const load = (async () => {
+  const { user } = { user: "hehe"};
+
   if (user) {
     return {
       user: user
     };
   }
-}
+}) satisfies PageLoad
