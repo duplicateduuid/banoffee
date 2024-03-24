@@ -1,11 +1,10 @@
+import { superValidate } from "sveltekit-superforms";
 import type { PageLoad } from "./$types";
+import { zod } from "sveltekit-superforms/adapters";
+import { signInRequestSchema } from "../requests/auth";
 
-export const load = (async () => {
-  const { user } = { user: "hehe"};
+export const load: PageLoad = (async () => {
+  const form = await superValidate(zod(signInRequestSchema));
 
-  if (user) {
-    return {
-      user: user
-    };
-  }
-}) satisfies PageLoad
+  return { form };
+});

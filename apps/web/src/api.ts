@@ -1,4 +1,4 @@
-import axios, { type AxiosResponse } from "axios";
+import axios, { AxiosError, isAxiosError, type AxiosResponse } from "axios";
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
@@ -6,12 +6,23 @@ export const api = axios.create({
 });
 
 export class RequestError extends Error {
-  constructor(response?: AxiosResponse | undefined) {
+  detail?: string;
+  status: number;
+  
+  constructor(error: Error) {
     super();
 
-    this.message = response?.data.message
-      ? response.data.message
-      : "unexpected error";
+    this.message = error.message;
+    
+    if (isAxiosError(error) && error.response) {
+      this.detail = error.response.data;
+      this.status = error.response.status;
+
+      Object.setPrototypeOf(this, RequestError.prototype)
+      return;
+    }
+
+    this.status = 500;
 
     Object.setPrototypeOf(this, RequestError.prototype)
   }

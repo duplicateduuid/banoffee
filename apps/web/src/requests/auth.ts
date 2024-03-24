@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { RequestError, api } from "../api";
 import { userSchema } from "../schemas/user";
-import { isAxiosError } from "axios";
 
 // TODO: properly add validation rules
 export const signInRequestSchema = z.object({
@@ -11,15 +10,16 @@ export const signInRequestSchema = z.object({
 
 export type SignInRequestType = z.infer<typeof signInRequestSchema>;
 
-export const signInRequest = async (payload: SignInRequestType) => {
+export const signInRequest = async (payload: SignInRequestType) => {      
   try {
     const { data } = await api.post("/login", payload);
+
     return userSchema.passthrough().parse(data);
   } catch (e) {
-    if (isAxiosError(e)) {
-      throw new RequestError(e.response);
+    if (e instanceof Error) {
+      throw new RequestError(e);
     }
 
-    throw new RequestError();
+    throw new RequestError(new Error("unexpected error"));
   }
 }
