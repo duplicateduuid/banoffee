@@ -28,7 +28,7 @@ import { createDialog, melt } from '@melt-ui/svelte';
 </button>
 
 <div class="" use:melt={$portalled}>
-  {#if $open}
+  {#if $open || true}
     <div
       use:melt={$overlay}
       class="fixed inset-0 z-50 bg-black/50"

@@ -1,4 +1,4 @@
-import { superValidate } from "sveltekit-superforms";
+import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { signInRequest, signInRequestSchema } from "../requests/auth";
 import { fail, redirect, type Actions } from "@sveltejs/kit";
@@ -15,14 +15,26 @@ export const actions: Actions = {
     try {
       const user = await signInRequest(form.data);
 
-      throw redirect(303, "/");      
-    } catch (e) {
-      console.log(e)
-      if (e instanceof RequestError) {
-        return fail(e.status, { message: e.message });
+      throw redirect(303, "/");
+    } catch (error) {
+      console.log(error)      
+      const isRequestError = error instanceof RequestError;
+
+      if (!isRequestError) {
+        return fail(500, { error });
       }
 
-      return fail(500, { error: e });
+      if (error.status === 403) {
+        return message(
+          form,
+          "We couldn't find an account that matches the login and password you entered."
+        )
+      }
+
+      return message(
+        form,
+        "Something went wrong signing you in."
+      );
     }
   }
 } 

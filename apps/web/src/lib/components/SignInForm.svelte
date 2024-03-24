@@ -1,9 +1,14 @@
 <script lang="ts">
-	import SuperDebug, { superForm } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
   import { page } from "$app/stores";
 	import { enhance } from '$app/forms';
 
-  const { form } = superForm($page.data.form);
+  const { form, errors, message, constraints } = superForm($page.data.form);
+
+  $effect(() => {
+    console.log($constraints.login)
+    console.log($errors)
+  })
 </script>
 
 <form
@@ -16,7 +21,6 @@
   </h2>
 
   <div class="flex flex-col gap-2.5 w-full px-8">
-    <SuperDebug data={$form} />
     <button
       class="w-full w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center hover:bg-stone-50 transition"
     >
@@ -48,11 +52,22 @@
       <input
         id="login"
         name="login"
+        aria-invalid={$errors.name ? true : undefined}
         bind:value={$form.login}
+        {...$constraints.login}
         class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
-          outline-0 ring-0 hover:ring-2 focus:ring-2 ring-primary-100 transition
-          border border-solid focus:border-primary-300"
+          outline-0 transition border-solid {
+            $errors.login
+                ? 'border-2 border-rose-500 bg-rose-100'
+                : 'border focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'
+          }"
       />
+
+      {#if $errors.login}
+        <p class="text-rose-500 text-xs font-semibold">
+          {$errors.login[0]}
+        </p>
+      {/if}
     </fieldset>
 
     <fieldset class="flex flex-col gap-0.5 text-stone-800">
@@ -61,13 +76,32 @@
         id="password"
         name="password"
         type="password"
+        aria-invalid={$errors.name ? true : undefined}
         bind:value={$form.password}
+        {...$constraints.password}
+
         class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
-          outline-0 ring-0 hover:ring-2 focus:ring-2 ring-primary-100 transition
-          border border-solid focus:border-primary-300"
-      />    
+          outline-0 transition border-solid {
+            $errors.password
+                ? 'border-2 border-rose-500 bg-rose-100'
+                : 'border focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'
+          }"
+      />
+      {#if $errors.password}
+        <p class="text-rose-500 text-xs font-semibold">
+          {$errors.password[0]}
+        </p>
+      {/if}
     </fieldset>
-  </div>
+  </div>  
+
+  {#if $message}
+    <div class="w-full px-8">
+      <p class="bg-red-200 rounded-lg px-4 py-2 text-red-600 font-semibold text-center">
+        {$message}
+      </p>
+    </div>
+  {/if}
 
   <hr class="w-full">
 
