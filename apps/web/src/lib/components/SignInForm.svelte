@@ -56,10 +56,10 @@
         bind:value={$form.login}
         {...$constraints.login}
         class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
-          outline-0 transition border-solid {
+          outline-0 transition border-solid border {
             $errors.login
-                ? 'border-2 border-rose-500 bg-rose-100'
-                : 'border focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'
+                ? 'border-rose-500'
+                : 'focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'
           }"
       />
 
@@ -81,10 +81,10 @@
         {...$constraints.password}
 
         class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
-          outline-0 transition border-solid {
+          outline-0 transition border-solid border {
             $errors.password
-                ? 'border-2 border-rose-500 bg-rose-100'
-                : 'border focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'
+                ? 'border-rose-500'
+                : 'focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'
           }"
       />
       {#if $errors.password}
