@@ -9,7 +9,7 @@ import (
 )
 
 type LoginRequest struct {
-	Login    string `json:"email" validate:"required" tstype:"string"`
+	Login    string `json:"login" validate:"required" tstype:"string"`
 	Password string `json:"password" validate:"required,min=8,max=255" tstype:"string"`
 }
 
@@ -22,7 +22,7 @@ func (s *API) handleLogin() gin.HandlerFunc {
 		req := LoginRequest{}
 
 		if ctx.ShouldBindJSON(&req) != nil {
-			ctx.JSON(400, gin.H{"error": "Invalid input"})
+			ctx.JSON(422, gin.H{"error": "Invalid input"})
 			return
 		}
 
@@ -31,19 +31,19 @@ func (s *API) handleLogin() gin.HandlerFunc {
 		err := validate.Struct(req)
 		if err != nil {
 			errors := err.(validator.ValidationErrors)
-			ctx.JSON(400, gin.H{"error": fmt.Sprintf("validation errors: %s", errors)})
+			ctx.JSON(422, gin.H{"error": fmt.Sprintf("validation errors: %s", errors)})
 
 			return
 		}
 
 		user, err := s.repositories.userRepository.GetUserByUsernameOrEmail(req.Login)
 		if err != nil {
-			ctx.JSON(400, gin.H{"error": "invalid email or password"})
+			ctx.JSON(403, gin.H{"error": "invalid email or password"})
 			return
 		}
 
 		if user.ValidPassword(req.Password) {
-			ctx.JSON(400, gin.H{"error": "invalid email or password"})
+			ctx.JSON(403, gin.H{"error": "invalid email or password"})
 			return
 		}
 
