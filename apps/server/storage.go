@@ -20,6 +20,7 @@ type UserRepository interface {
 	CreateUser(*User) (*User, error)
 	GetUserById(uuid.UUID) (*User, error)
 	GetUserByEmail(string) (*User, error)
+	GetUserByUsernameOrEmail(string) (*User, error)
 	GetUserResource(user *User, resourceId string) (*Resource, error)
 	GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error)
 	CreateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
@@ -90,6 +91,19 @@ func (u UserPostgresRepository) GetUserByEmail(email string) (*User, error) {
 		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio
 		FROM "user" u WHERE u.email=$1`,
 		email,
+	)
+
+	return user, err
+}
+
+func (u UserPostgresRepository) GetUserByUsernameOrEmail(usernameOrEmail string) (*User, error) {
+	user := new(User)
+	err := u.db.Get(
+		user,
+		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio
+		 FROM "user" u 
+		 WHERE u.email=$1 OR u.username=$1`,
+		usernameOrEmail,
 	)
 
 	return user, err

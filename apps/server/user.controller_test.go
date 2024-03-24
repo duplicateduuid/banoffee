@@ -23,14 +23,35 @@ func testNewUser(t *testing.T, repos *Repositories) (*User, string) {
 	return user, password
 }
 
-func TestLogin(t *testing.T) {
+func TestLoginWithEmail(t *testing.T) {
 	t.Parallel()
 
 	repos := newTestRepositories(t)
 	user, password := testNewUser(t, &repos)
 
 	req := LoginRequest{
-		Email:    user.Email,
+		Login:    user.Email,
+		Password: password,
+	}
+	router := newTestRouter(t, repos)
+	w := router.post("/login", req)
+
+	body := w.Body.String()
+	assert.Equal(t, 200, w.Code, body)
+
+	var resp LoginResponse
+	json.Unmarshal([]byte(body), &resp)
+	assert.Equal(t, user.Email, resp.User.Email)
+}
+
+func TestLoginWithUsername(t *testing.T) {
+	t.Parallel()
+
+	repos := newTestRepositories(t)
+	user, password := testNewUser(t, &repos)
+
+	req := LoginRequest{
+		Login:    user.Username,
 		Password: password,
 	}
 	router := newTestRouter(t, repos)

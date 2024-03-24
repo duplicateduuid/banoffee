@@ -12,7 +12,7 @@ func testNewResource(t *testing.T, repos *Repositories) *Resource {
 	uuid := uuid.New().String()
 
 	resource := NewResource("http://"+uuid+"/", uuid, nil, nil, nil)
-	err := repos.resourceRepository.CreateResource(resource)
+	_, err := repos.resourceRepository.CreateResource(resource)
 
 	if err != nil {
 		t.Errorf("[ERROR] [testNewResource] failed to create resource: %s", err)
@@ -33,7 +33,7 @@ func TestCreateResource(t *testing.T) {
 	router := newAuthTestRouter(t, repos, *auth)
 	w := router.post("/resource", resource)
 
-	assert.Equal(t, 204, w.Code, w.Body)
+	assert.Equal(t, 200, w.Code, w.Body)
 }
 
 func TestResourceSearch(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 )
 
 type LoginRequest struct {
-	Email    string `db:"email" json:"email" validate:"required,email" tstype:"string"`
+	Login    string `json:"email" validate:"required" tstype:"string"`
 	Password string `json:"password" validate:"required,min=8,max=255" tstype:"string"`
 }
 
@@ -36,7 +36,7 @@ func (s *API) handleLogin() gin.HandlerFunc {
 			return
 		}
 
-		user, err := s.repositories.userRepository.GetUserByEmail(req.Email)
+		user, err := s.repositories.userRepository.GetUserByUsernameOrEmail(req.Login)
 		if err != nil {
 			ctx.JSON(400, gin.H{"error": "invalid email or password"})
 			return
