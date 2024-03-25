@@ -26,3 +26,32 @@ export const signInRequest = async (payload: SignInRequestType) => {
     throw new RequestError(new Error("unexpected error"));
   }
 }
+
+export const signUpRequestSchema = z.object({
+  username: z.string()
+    .min(5, "Username must have at least 5 characters")
+    .max(20, "Username can't have more than 20 characters"),
+  email: z.string()
+    .email()
+    .min(5, "Email must have at least 5 characters")
+    .max(20, "Email can't have more than 20 characters"),
+  password: z.string()
+    .min(8, "Password must have at least 8 characters")
+    .max(255, "Password can't have more than 255 characters"),
+});
+
+type SignUpRequestType = z.infer<typeof signUpRequestSchema>;
+
+export const signUpRequest = async (payload: SignUpRequestType) => {      
+  try {
+    const { data } = await api.post("/register", payload);
+
+    return userSchema.passthrough().parse(data);
+  } catch (e) {
+    if (e instanceof Error) {
+      throw new RequestError(e);
+    }
+
+    throw new RequestError(new Error("unexpected error"));
+  }
+}
