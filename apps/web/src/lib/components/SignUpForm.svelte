@@ -5,8 +5,15 @@
 	import { superForm } from 'sveltekit-superforms';
   import { page } from "$app/stores";
 	import { enhance } from '$app/forms';
+	import { ChevronLeft } from 'lucide-svelte';
 
   const { form, errors, message, constraints } = superForm($page.data.signUpForm);
+
+  type Step =
+    | "ask-sign-alternative"
+    | "sign-with-email";
+
+  let step: Step = $state("sign-with-email");
 </script>
 
 <div
@@ -15,7 +22,14 @@
   <h2 class="font-bold font-primary text-3xl w-full">
     Nice to meet you!
   </h2>
+  {#if step === "ask-sign-alternative"}
+    {@render alternatives()}
+    {:else if step === "sign-with-email"}
+    {@render emailForm()}
+  {/if}
+</div>
 
+{#snippet alternatives()}
   <div class="flex flex-col gap-2.5 w-full">
     <button
       class="w-full w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center bg-stone-800 hover:bg-stone-700 text-white transition"
@@ -43,12 +57,10 @@
   </div>
 
   <button
+    onclick={() => step = "sign-with-email"}
     class="w-full w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center transition"
   >
-    <div class="flex items-center gap-4">
-      <img src="/icons/apple-white.svg" alt="google icon" class="h-6 w-6" />
       Continue with email
-    </div>
   </button>
 
   {#if $message}
@@ -68,4 +80,103 @@
       Sign in
     </button>
   </span>
-</div>
+{/snippet}
+
+{#snippet emailForm()}
+  <div class="w-full flex flex-col gap-8">
+    <div class="flex flex-col gap-4 w-full">
+      <fieldset class="flex flex-col gap-0.5 text-stone-800">
+        <label class="text-stone-800 tracking-tight" for="login"> Username </label>
+        <input
+          id="username"
+          name="username"
+          aria-invalid={$errors.username ? true : undefined}
+          bind:value={$form.username}
+          {...$constraints.username}
+          class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
+            outline-0 transition border-solid border {
+              $errors.username
+                  ? 'border-rose-500'
+                  : 'focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'
+            }"
+        />
+
+        {#if $errors.username}
+          <p class="text-rose-500 text-xs font-semibold">
+            {$errors.username[0]}
+          </p>
+        {/if}
+      </fieldset>
+
+
+      <fieldset class="flex flex-col gap-0.5 text-stone-800">
+        <label class="text-stone-800 tracking-tight" for="login"> Email </label>
+        <input
+          id="email"
+          name="email"
+          aria-invalid={$errors.name ? true : undefined}
+          bind:value={$form.email}
+          {...$constraints.email}
+          class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
+            outline-0 transition border-solid border {
+              $errors.email
+                  ? 'border-rose-500'
+                  : 'focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'
+            }"
+        />
+
+        {#if $errors.email}
+          <p class="text-rose-500 text-xs font-semibold">
+            {$errors.email[0]}
+          </p>
+        {/if}
+      </fieldset>
+
+      <fieldset class="flex flex-col gap-0.5 text-stone-800">
+        <label class="text-stone-800 tracking-tight" for="password"> Password </label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          aria-invalid={$errors.name ? true : undefined}
+          bind:value={$form.password}
+          {...$constraints.password}
+
+          class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
+            outline-0 transition border-solid border {
+              $errors.password
+                  ? 'border-rose-500'
+                  : 'focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'
+            }"
+        />
+        {#if $errors.password}
+          <p class="text-rose-500 text-xs font-semibold">
+            {$errors.password[0]}
+          </p>
+        {/if}
+      </fieldset>
+    </div>
+
+    <hr class="w-[calc(100%+64px)] mx-[-32px]" />
+
+    <div class="flex justify-between gap-4 w-full">
+      <span class="flex items-center gap-1.5 text-stone-500 text-sm">
+        Don't have an account?
+        <button
+          onclick={onSignIn}
+          class="underline text-stone-800 hover:text-stone-600 font-semibold"
+        >
+          Sign up
+        </button>
+      </span>
+
+      <button
+        type="submit"
+        class="py-3 items-center justify-center rounded-lg bg-primary-400 hover:bg-primary-300
+          text-white font-semibold px-4 font-medium leading-none text-magnum-900 shadow"
+      >
+        Sign in
+      </button>
+    </div>
+  </div>
+{/snippet}
