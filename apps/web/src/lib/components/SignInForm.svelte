@@ -5,12 +5,7 @@
   import { page } from "$app/stores";
 	import { enhance } from '$app/forms';
 
-  const { form, errors, message, constraints } = superForm($page.data.form);
-
-  $effect(() => {
-    console.log($constraints.login)
-    console.log($errors)
-  })
+  const { form, errors, message, constraints } = superForm($page.data.signInForm);
 </script>
 
 <form

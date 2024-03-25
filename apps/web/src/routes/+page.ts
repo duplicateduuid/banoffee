@@ -4,7 +4,8 @@ import { zod } from "sveltekit-superforms/adapters";
 import { signInRequestSchema } from "../requests/auth";
 
 export const load: PageLoad = (async () => {
-  const form = await superValidate(zod(signInRequestSchema));
+  const signInForm = await superValidate(zod(signInRequestSchema));
+  const signUpForm = await superValidate(zod(signInRequestSchema));
 
-  return { form };
+  return { signInForm, signUpForm };
 });

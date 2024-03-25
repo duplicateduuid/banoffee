@@ -1,9 +1,8 @@
 <script lang="ts">    
   import SignInForm from '$lib/components/SignInForm.svelte';
 	import SignUpForm from '$lib/components/SignUpForm.svelte';
-import { createDialog, melt } from '@melt-ui/svelte';
+  import { createDialog, melt } from '@melt-ui/svelte';
   import { X } from "lucide-svelte";
-	import { writable } from 'svelte/store';
   /** Internal helpers */
   import { fade } from 'svelte/transition';
 
@@ -20,7 +19,7 @@ import { createDialog, melt } from '@melt-ui/svelte';
     forceVisible: true,
   });
 
-  let formType: "sign-in" | "sign-up" = $state("sign-in");
+  let formType: "sign-in" | "sign-up" = $state("sign-up");
 </script>
 
 <button
