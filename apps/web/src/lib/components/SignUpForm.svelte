@@ -19,13 +19,28 @@
 <div
   class="flex flex-col items-center w-full gap-8 pt-8 pb-6 px-8"
 >
-  <h2 class="font-bold font-primary text-3xl w-full">
-    Nice to meet you!
-  </h2>
+  <div class="flex gap-4 w-full items-center">
+    {#if step === "sign-with-email"}
+      <button
+        onclick={() => step = "ask-sign-alternative"}
+        class="shadow rounded-lg p-1"
+      >
+        <ChevronLeft />
+      </button>
+    {/if}
+
+    <h2 class="font-bold font-primary text-3xl w-full">
+      Nice to meet you!
+    </h2>
+  </div>
+
+
   {#if step === "ask-sign-alternative"}
-    {@render alternatives()}
+    { @render alternatives() }
+
     {:else if step === "sign-with-email"}
-    {@render emailForm()}
+
+    { @render emailForm() }
   {/if}
 </div>
 
