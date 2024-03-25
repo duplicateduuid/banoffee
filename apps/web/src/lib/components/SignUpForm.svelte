@@ -1,16 +1,11 @@
-<script lang="ts">  
-  let { onSignUp } = $props();
+<script lang="ts">
+  let { onSignIn } = $props();
   
 	import { superForm } from 'sveltekit-superforms';
   import { page } from "$app/stores";
 	import { enhance } from '$app/forms';
 
   const { form, errors, message, constraints } = superForm($page.data.form);
-
-  $effect(() => {
-    console.log($constraints.login)
-    console.log($errors)
-  })
 </script>
 
 <form
@@ -19,7 +14,7 @@
   class="flex flex-col items-center w-full gap-8 pt-8 pb-6"
 >
   <h2 class="font-bold font-primary text-3xl w-full px-8">
-    Welcome back!
+    Nice to meet you!
   </h2>
 
   <div class="flex flex-col gap-2.5 w-full px-8">
@@ -28,7 +23,7 @@
     >
       <div class="flex items-center gap-4">
         <img src="/icons/google.svg" alt="google icon" class="h-6 w-6" />
-        Sign in with Google
+        Sign up with Google
       </div>
     </button>
 
@@ -38,7 +33,7 @@
     >
       <div class="flex items-center gap-4">
         <img src="/icons/apple.svg" alt="google icon" class="h-6 w-6" />
-        Sign in with Apple
+        Sign up with Apple
       </div>
     </button>
   </div>
@@ -109,12 +104,12 @@
 
   <div class="flex justify-between gap-4 w-full px-8">
     <span class="flex items-center gap-1.5 text-stone-500 text-sm">
-      Don't have an account?
+      Already have an account?
       <button
-        onclick={onSignUp}
         class="underline text-stone-800 hover:text-stone-600 font-semibold"
+        onclick={onSignIn}
       >
-        Sign up
+        Sign in
       </button>
     </span>
 
@@ -123,7 +118,7 @@
       class="py-3 items-center justify-center rounded-lg bg-primary-400 hover:bg-primary-300
         text-white font-semibold px-4 font-medium leading-none text-magnum-900 shadow"
     >
-      Sign in
+      Sign up
     </button>
   </div>
 </form>

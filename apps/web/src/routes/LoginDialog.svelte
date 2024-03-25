@@ -1,7 +1,9 @@
 <script lang="ts">    
   import SignInForm from '$lib/components/SignInForm.svelte';
+	import SignUpForm from '$lib/components/SignUpForm.svelte';
 import { createDialog, melt } from '@melt-ui/svelte';
   import { X } from "lucide-svelte";
+	import { writable } from 'svelte/store';
   /** Internal helpers */
   import { fade } from 'svelte/transition';
 
@@ -17,6 +19,8 @@ import { createDialog, melt } from '@melt-ui/svelte';
   } = createDialog({
     forceVisible: true,
   });
+
+  let formType: "sign-in" | "sign-up" = $state("sign-in");
 </script>
 
 <button
@@ -46,7 +50,11 @@ import { createDialog, melt } from '@melt-ui/svelte';
       >
         <X size=20 />
       </button>
-      <SignInForm onSubmit={$close} />    
+      {#if formType === "sign-in"}
+        <SignInForm onSignUp={() => formType = "sign-up"} />
+        {:else if formType === "sign-up"}
+        <SignUpForm onSignIn={() => formType = "sign-in"} />
+      {/if}
     </div>
   {/if}
 </div>
