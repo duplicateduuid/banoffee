@@ -1,5 +1,5 @@
 <script lang="ts">  
-  let { onSignUp } = $props();
+  let { onSignUp, onSubmitted } = $props();
   
 	import { createForm } from 'felte';
   import { validator } from "@felte/validator-zod";
@@ -11,7 +11,7 @@
       const { user } = await signInRequest(fields);
       localStorage.setItem("user", JSON.stringify(user))
 
-      onSignUp();
+      onSubmitted();
     }
   })
 </script>
@@ -26,6 +26,7 @@
 
   <div class="flex flex-col gap-2.5 w-full px-8">
     <button
+      type="button"
       class="w-full w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center hover:bg-stone-50 transition"
     >
       <div class="flex items-center gap-4">
@@ -36,6 +37,7 @@
 
 
     <button
+      type="button"
       class="w-full w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center hover:bg-stone-50 transition"
     >
       <div class="flex items-center gap-4">
@@ -110,6 +112,7 @@
     <span class="flex items-center gap-1.5 text-stone-500 text-sm">
       Don't have an account?
       <button
+        type="button"
         onclick={onSignUp}
         class="underline text-stone-800 hover:text-stone-600 font-semibold"
       >

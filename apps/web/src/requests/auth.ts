@@ -17,7 +17,7 @@ export const signInRequest = async (payload: SignInRequestType) => {
   try {
     const { data } = await api.post("/login", payload);
 
-    const user = userSchema.passthrough().parse(data);
+    const user = userSchema.passthrough().parse(data.user);
     return { user };
   } catch (e) {
     if (e instanceof Error) {

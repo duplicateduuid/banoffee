@@ -19,7 +19,7 @@
     forceVisible: true,
   });
 
-  let formType: "sign-in" | "sign-up" = $state("sign-up");
+  let formType: "sign-in" | "sign-up" = $state("sign-in");
 </script>
 
 <button
@@ -31,7 +31,7 @@
 </button>
 
 <div class="" use:melt={$portalled}>
-  {#if $open || true}
+  {#if $open}
     <div
       use:melt={$overlay}
       class="fixed inset-0 z-50 bg-black/50"
@@ -50,9 +50,15 @@
         <X size=20 />
       </button>
       {#if formType === "sign-in"}
-        <SignInForm onSignUp={() => formType = "sign-up"} />
+        <SignInForm
+          onSignUp={() => formType = "sign-up"}
+          onSubmitted={() => open.set(false)}
+        />
         {:else if formType === "sign-up"}
-        <SignUpForm onSignIn={() => formType = "sign-in"} />
+        <SignUpForm 
+          onSignIn={() => formType = "sign-in"}
+          onSubmitted={() => open.set(false)}
+        />
       {/if}
     </div>
   {/if}

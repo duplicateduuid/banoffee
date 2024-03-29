@@ -1,5 +1,5 @@
 <script lang="ts">  
-  let { onSignIn } = $props();
+  let { onSignIn, onSubmitted } = $props();
   
 	import { ChevronLeft } from 'lucide-svelte';
   import { createForm } from 'felte';
@@ -11,6 +11,8 @@
     onSubmit: async (fields) => {
       const { user } = await signUpRequest(fields);
       localStorage.setItem("user", JSON.stringify(user));
+
+      onSubmitted();
     }
   })
 
@@ -18,7 +20,7 @@
     | "ask-sign-alternative"
     | "sign-with-email";
 
-  let step: Step = $state("sign-with-email");
+  let step: Step = $state("ask-sign-alternative");
 </script>
 
 <div
@@ -100,7 +102,6 @@
     Already have an account?
     <button
       type="submit"
-      onclick={onSignIn}
       class="underline text-stone-800 hover:text-stone-600 font-semibold"
     >
       Sign in
