@@ -1,9 +1,15 @@
 import axios, { AxiosError, isAxiosError, type AxiosResponse } from "axios";
+import { LucideChrome } from "lucide-svelte";
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
   withCredentials: true,
 });
+
+type Session = {
+  id: string,
+  expiresAt: string,
+}
 
 export class RequestError extends Error {
   detail?: string;

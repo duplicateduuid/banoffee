@@ -13,11 +13,12 @@ export const signInRequestSchema = z.object({
 
 export type SignInRequestType = z.infer<typeof signInRequestSchema>;
 
-export const signInRequest = async (payload: SignInRequestType) => {      
+export const signInRequest = async (payload: SignInRequestType) => {
   try {
     const { data } = await api.post("/login", payload);
 
-    return userSchema.passthrough().parse(data);
+    const user = userSchema.passthrough().parse(data);
+    return { user };
   } catch (e) {
     if (e instanceof Error) {
       throw new RequestError(e);
@@ -40,13 +41,15 @@ export const signUpRequestSchema = z.object({
     .max(255, "Password can't have more than 255 characters"),
 });
 
-type SignUpRequestType = z.infer<typeof signUpRequestSchema>;
+export type SignUpRequestType = z.infer<typeof signUpRequestSchema>;
 
 export const signUpRequest = async (payload: SignUpRequestType) => {      
   try {
     const { data } = await api.post("/register", payload);
+    
+    const user = userSchema.passthrough().parse(data.user);
 
-    return userSchema.passthrough().parse(data);
+    return { user };
   } catch (e) {
     if (e instanceof Error) {
       throw new RequestError(e);

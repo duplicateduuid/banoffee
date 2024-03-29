@@ -1,13 +1,18 @@
-
 <script lang="ts">  
   let { onSignIn } = $props();
   
-	import { superForm } from 'sveltekit-superforms';
-  import { page } from "$app/stores";
-	import { enhance } from '$app/forms';
 	import { ChevronLeft } from 'lucide-svelte';
+  import { createForm } from 'felte';
+  import { validator } from '@felte/validator-zod';
+	import { type SignUpRequestType, signUpRequestSchema, signUpRequest } from '../../requests/auth';
 
-  const { form, errors, message, constraints } = superForm($page.data.signUpForm);
+  const { form, errors } = createForm<SignUpRequestType>({
+    extend: [validator({ schema: signUpRequestSchema })],
+    onSubmit: async (fields) => {
+      const { user } = await signUpRequest(fields);
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+  })
 
   type Step =
     | "ask-sign-alternative"
@@ -22,6 +27,7 @@
   <div class="flex gap-4 w-full items-center">
     {#if step === "sign-with-email"}
       <button
+        type="button"
         onclick={() => step = "ask-sign-alternative"}
         class="shadow rounded-lg p-1"
       >
@@ -63,8 +69,7 @@
         <img src="/icons/apple-white.svg" alt="google icon" class="h-6 w-6" />
         Sign in with Apple
       </div>
-    </button>
-  </div>
+    </button>  </div>
 
   <div class="relative w-full flex items-center justify-center">
     <span class="absolute bg-white px-3 text-sm text-stone-600"> or </span>
@@ -78,17 +83,23 @@
       Continue with email
   </button>
 
-  {#if $message}
-    <div class="w-full">
-      <p class="bg-red-200 rounded-lg px-4 py-2 text-red-600 font-semibold text-center">
-        {$message}
-      </p>
-    </div>
-  {/if}
+  <!--
+  { @html
+    TODO: display a general error message here
+    {#if $message}
+      <div class="w-full">
+        <p class="bg-red-200 rounded-lg px-4 py-2 text-red-600 font-semibold text-center">
+          {$message}
+        </p>
+      </div>
+    {/if}
+  }
+  -->
 
   <span class="flex items-center gap-1.5 text-stone-500 text-sm">
     Already have an account?
     <button
+      type="submit"
       onclick={onSignIn}
       class="underline text-stone-800 hover:text-stone-600 font-semibold"
     >
@@ -98,16 +109,16 @@
 {/snippet}
 
 {#snippet emailForm()}
-  <div class="w-full flex flex-col gap-8">
+  <form
+    use:form
+    class="w-full flex flex-col gap-8"
+  >
     <div class="flex flex-col gap-4 w-full">
       <fieldset class="flex flex-col gap-0.5 text-stone-800">
         <label class="text-stone-800 tracking-tight" for="login"> Username </label>
         <input
           id="username"
           name="username"
-          aria-invalid={$errors.username ? true : undefined}
-          bind:value={$form.username}
-          {...$constraints.username}
           class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
             outline-0 transition border-solid border {
               $errors.username
@@ -129,9 +140,6 @@
         <input
           id="email"
           name="email"
-          aria-invalid={$errors.name ? true : undefined}
-          bind:value={$form.email}
-          {...$constraints.email}
           class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
             outline-0 transition border-solid border {
               $errors.email
@@ -153,10 +161,6 @@
           id="password"
           name="password"
           type="password"
-          aria-invalid={$errors.name ? true : undefined}
-          bind:value={$form.password}
-          {...$constraints.password}
-
           class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
             outline-0 transition border-solid border {
               $errors.password
@@ -178,10 +182,11 @@
       <span class="flex items-center gap-1.5 text-stone-500 text-sm">
         Don't have an account?
         <button
+          type="button"
           onclick={onSignIn}
           class="underline text-stone-800 hover:text-stone-600 font-semibold"
         >
-          Sign up
+          Sign in
         </button>
       </span>
 
@@ -193,5 +198,5 @@
         Sign in
       </button>
     </div>
-  </div>
+  </form>
 {/snippet}

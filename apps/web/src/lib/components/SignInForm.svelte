@@ -1,16 +1,23 @@
 <script lang="ts">  
   let { onSignUp } = $props();
   
-	import { superForm } from 'sveltekit-superforms';
-  import { page } from "$app/stores";
-	import { enhance } from '$app/forms';
+	import { createForm } from 'felte';
+  import { validator } from "@felte/validator-zod";
+	import { type SignInRequestType, signInRequestSchema, signInRequest } from '../../requests/auth';
 
-  const { form, errors, message, constraints } = superForm($page.data.signInForm);
+  const { form, errors } = createForm<SignInRequestType>({
+    extend: [validator({ schema: signInRequestSchema })],
+    onSubmit: async (fields) => {
+      const { user } = await signInRequest(fields);
+      localStorage.setItem("user", JSON.stringify(user))
+
+      onSignUp();
+    }
+  })
 </script>
 
 <form
-  use:enhance
-  method="POST"
+  use:form
   class="flex flex-col items-center w-full gap-8 pt-8 pb-6"
 >
   <h2 class="font-bold font-primary text-3xl w-full px-8">
@@ -49,9 +56,6 @@
       <input
         id="login"
         name="login"
-        aria-invalid={$errors.name ? true : undefined}
-        bind:value={$form.login}
-        {...$constraints.login}
         class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
           outline-0 transition border-solid border {
             $errors.login
@@ -73,9 +77,6 @@
         id="password"
         name="password"
         type="password"
-        aria-invalid={$errors.name ? true : undefined}
-        bind:value={$form.password}
-        {...$constraints.password}
 
         class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
           outline-0 transition border-solid border {
@@ -92,6 +93,8 @@
     </fieldset>
   </div>  
 
+  <!--
+  TODO: render a server error message here
   {#if $message}
     <div class="w-full px-8">
       <p class="bg-red-200 rounded-lg px-4 py-2 text-red-600 font-semibold text-center">
@@ -99,6 +102,7 @@
       </p>
     </div>
   {/if}
+  -->
 
   <hr class="w-full">
 
