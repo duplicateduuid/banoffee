@@ -1,5 +1,6 @@
-<script lang="ts">  
-  let { onSignUp, onSubmitted } = $props();
+<script lang="ts">
+  type Props = { onSignUp: () => void, onSubmitted: () => void };
+  let { onSignUp, onSubmitted } = $props<Props>();
   
 	import { createForm } from 'felte';
   import { validator } from "@felte/validator-zod";
