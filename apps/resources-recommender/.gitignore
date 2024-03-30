@@ -17,6 +17,7 @@ parts/
 sdist/
 var/
 *.egg-info/
+pyenv.cfg
 
 # Installer logs
 pip-log.txt
@@ -31,3 +32,6 @@ coverage.xml
 
 # Translations
 *.mo
+
+# Datasets
+datasets/

@@ -33,6 +33,9 @@ def create_database_pool():
 def generate_datasets(pool):
     connection = pool.getconn()
 
+    if not os.path.exists('./datasets'):
+        os.mkdir('./datasets')
+
     with open("./datasets/resources.csv", "w+") as csv_file:
         cursor = connection.cursor()
         cursor.copy_expert("COPY (SELECT id, url, name, author FROM resource) TO STDOUT WITH CSV HEADER", csv_file)
