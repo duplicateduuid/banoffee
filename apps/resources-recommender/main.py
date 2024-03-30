@@ -66,36 +66,42 @@ def train_knn(algo, pool):
     generate_datasets(pool)
 
     file_path = os.path.expanduser("./datasets/ratings.csv")
-    reader = Reader(line_format="user item rating", sep=",")
+    reader = Reader(line_format="user item rating", sep=",", skip_lines=1)
 
     data = Dataset.load_from_file(file_path, reader=reader)
 
     trainset = data.build_full_trainset()
     algo.fit(trainset)
 
-def read_items_names():
+def read_resources_urls():
     file_name = "./datasets/resources.csv"
-    id_to_name = {}
-    name_to_id = {}
+    id_to_url = {}
+    url_to_id = {}
     with open(file_name, encoding="ISO-8859-1") as f:
+        first_line = True
+
         for line in f:
+            if first_line:
+                first_line = False
+                continue
+        
             line = line.split(',')
-            id_to_name[line[0]] = line[1]
-            name_to_id[line[1]] = line[0]
+            id_to_url[line[0]] = line[1]
+            url_to_id[line[1]] = line[0]
     
-    return id_to_name, name_to_id
+    return id_to_url, url_to_id
 
-def get_resource_nearest_neighbors(algo, resource_name):
-    id_to_name, name_to_id = read_items_names()
+def get_resource_nearest_neighbors(algo, resource_url):
+    id_to_url, name_to_url = read_resources_urls()
 
-    raw_id = name_to_id[resource_name]
+    raw_id = name_to_url[resource_url]
     inner_id = algo.trainset.to_inner_iid(raw_id)
 
     neighbors = algo.get_neighbors(inner_id, k=1)
     neighbors = (
         algo.trainset.to_raw_iid(inner_id) for inner_id in neighbors
     )
-    neighbors = (id_to_name[rid] for rid in neighbors)
+    neighbors = (id_to_url[rid] for rid in neighbors)
 
     return neighbors
 
@@ -110,12 +116,19 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
         json_data = json.loads(post_data.decode('utf-8'))
 
+        resource_url = json_data.get('resource', '')
+
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
-
-        response_json = json.dumps(json_data)
-        self.wfile.write(response_json.encode('utf-8'))
+        
+        try:
+            nearest_neighbors = get_resource_nearest_neighbors(algo, resource_url)
+            response_json = json.dumps(nearest_neighbors)
+            self.wfile.write(response_json.encode('utf-8'))
+        except:
+            response_json = json.dumps({ 'error': 'Cannot find any recommendations' })
+            self.wfile.write(response_json.encode('utf-8'))
 
 def run_server(pool, algo, port=8000):
     server_address = ('', port)
@@ -127,6 +140,6 @@ pool = create_database_pool()
 
 sim_options = {"name": "cosine", "user_based": False}
 algo = KNNBaseline(sim_options=sim_options)
-# train_knn(algo, pool)
+train_knn(algo, pool)
 
 run_server(pool, algo)
