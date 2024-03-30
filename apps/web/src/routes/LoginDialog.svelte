@@ -2,9 +2,9 @@
   import SignInForm from '$lib/components/SignInForm.svelte';
 	import SignUpForm from '$lib/components/SignUpForm.svelte';
   import { createDialog, melt } from '@melt-ui/svelte';
-  import { X } from "lucide-svelte";
-  /** Internal helpers */
+  import { MoveRight, X } from "lucide-svelte";
   import { fade } from 'svelte/transition';
+	import type { User } from '../schemas/user';
 
   const {
     elements: {
@@ -24,10 +24,10 @@
 
 <button
   use:melt={$trigger}
-  class="inline-flex items-center justify-center rounded-xl bg-white px-4 py-3
-  font-medium leading-none text-magnum-700 shadow hover:opacity-75"
+  class="flex items-center gap-2 font-bold text-2xl font-primary px-2"
 >
   Sign in
+  <MoveRight />
 </button>
 
 <div class="" use:melt={$portalled}>
