@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 )
 
 type LoginRequest struct {
@@ -47,15 +48,7 @@ func (s *API) handleLogin() gin.HandlerFunc {
 			return
 		}
 
-		session_id := uuid.New().String()
-		err = s.repositories.redis.Set(ctx, session_id, user.Id.String(), 0).Err()
-		if err != nil {
-			fmt.Printf("[ERROR] [UserController.login] failed to set redis session: %s\n", err)
-			ctx.JSON(500, gin.H{"error": "unexpected error"})
-			return
-		}
-
-		ctx.SetCookie("sessionId", session_id, 3600*24, "/", "localhost", false, false)
+		login(user, ctx, s.repositories.redis)
 
 		response := LoginResponse{User: user}
 		ctx.JSON(200, response)
@@ -107,9 +100,25 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 			return
 		}
 
+		login(user, ctx, s.repositories.redis)
+
 		response := RegisterResponse{User: user}
 		ctx.JSON(200, response)
 	}
+}
+
+// TODO: move somewhere else
+func login(user *User, ctx *gin.Context, redis *redis.Client) {
+	session_id := uuid.New().String()
+
+	err := redis.Set(ctx, session_id, user.Id.String(), 0).Err()
+	if err != nil {
+		fmt.Printf("[ERROR] [UserController.login] failed to set redis session: %s\n", err)
+		ctx.JSON(500, gin.H{"error": "unexpected error"})
+		return
+	}
+
+	ctx.SetCookie("sessionId", session_id, 3600*24, "/", "localhost", false, false)
 }
 
 type SaveResourcePayload struct {
