@@ -8,6 +8,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "dev:web": "cd apps/web && yarn dev",
     "dev:server": "cd apps/server && go run .",
+    "dev:recommender": "cd apps/resources-recommender && source bin/activate && mypy main.py && python3 main.py",
     "build:web-extension": "cd apps/extension/web-extension && yarn build"
   },
   "devDependencies": {
