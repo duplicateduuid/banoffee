@@ -2,8 +2,8 @@
 	import { MoveRight } from 'lucide-svelte';
 	import { superForm } from 'sveltekit-superforms';
 
-	import LoginDialog from './LoginDialog.svelte';
 	import type { PageData } from './$types';
+	import SignDialog from './SignDialog.svelte';
 
 	export let data: PageData;
 </script>
@@ -26,7 +26,7 @@
 					</div>
 					<a href="/bookmarks" class="text-2xl text-[#7A7974]">Bookmarks</a>
 				</div>
-				<LoginDialog />
+				<SignDialog />
 			</header>
 
 			<section class="flex flex-col gap-8">

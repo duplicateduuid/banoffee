@@ -1,6 +1,7 @@
 <script lang="ts">  
-  let { onSignIn, onSubmitted } = $props();
-  
+  type Props = { onSignIn: () => void, onSubmitted: () => void };
+  let { onSignIn, onSubmitted } = $props<Props>();
+
 	import { ChevronLeft } from 'lucide-svelte';
   import { createForm } from 'felte';
   import { validator } from '@felte/validator-zod';
@@ -98,11 +99,16 @@
   }
   -->
 
+  {@render signIn()}
+{/snippet}
+
+{#snippet signIn()}
   <span class="flex items-center gap-1.5 text-stone-500 text-sm">
     Already have an account?
     <button
       type="submit"
       class="underline text-stone-800 hover:text-stone-600 font-semibold"
+      onclick={onSignIn}
     >
       Sign in
     </button>
@@ -180,16 +186,7 @@
     <hr class="w-[calc(100%+64px)] mx-[-32px]" />
 
     <div class="flex justify-between gap-4 w-full">
-      <span class="flex items-center gap-1.5 text-stone-500 text-sm">
-        Don't have an account?
-        <button
-          type="button"
-          onclick={onSignIn}
-          class="underline text-stone-800 hover:text-stone-600 font-semibold"
-        >
-          Sign in
-        </button>
-      </span>
+      {@render signIn()}
 
       <button
         type="submit"
