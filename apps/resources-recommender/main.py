@@ -1,3 +1,4 @@
+import heapq
 import os
 
 import psycopg2
@@ -62,6 +63,16 @@ def generate_datasets(pool):
 
     pool.putconn(connection)
 
+class CustomKNN(KNNBaseline):
+    # TODO: check performance against default KNNBaseline get_neighbors
+    def get_neighbors_based_on_user(self, item_id, user_id, k):
+        user_ratings = [iid for (uid, iid, _) in self.trainset.all_ratings() if uid == self.trainset.to_inner_uid(user_id)]
+        others = [(iid, self.sim[item_id, iid]) for iid in self.trainset.all_items() if iid not in user_ratings]
+        others = heapq.nlargest(k, others, key=lambda tple: tple[1])
+        k_nearest_neighbors = [j for (j, _) in others]
+
+        return k_nearest_neighbors
+ 
 def train_knn(algo, pool):
     generate_datasets(pool)
 
@@ -91,13 +102,14 @@ def read_resources_urls():
     
     return id_to_url, url_to_id
 
-def get_resource_nearest_neighbors(algo, resource_url):
+def get_resource_nearest_neighbors(algo, resource_url, user_id):
+    # TODO: move this to train_knn, we don't want to create this every time
     id_to_url, url_to_id = read_resources_urls()
 
     raw_id = url_to_id[resource_url]
     inner_id = algo.trainset.to_inner_iid(raw_id)
 
-    neighbors = algo.get_neighbors(inner_id, k=10)
+    neighbors = algo.get_neighbors_based_on_user(inner_id, user_id, k=10)
     neighbors = (
         algo.trainset.to_raw_iid(inner_id) for inner_id in neighbors
     )
@@ -116,6 +128,8 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
         json_data = json.loads(post_data.decode('utf-8'))
 
+        user_id = json_data.get('user', '')
+        # TODO: get resource from db based on user
         resource_url = json_data.get('resource', '')
 
         self.send_response(200)
@@ -123,7 +137,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         
         try:
-            nearest_neighbors = get_resource_nearest_neighbors(algo, resource_url)
+            nearest_neighbors = get_resource_nearest_neighbors(algo, resource_url, user_id)
             response_json = json.dumps(nearest_neighbors)
             self.wfile.write(response_json.encode('utf-8'))
         except:
@@ -139,7 +153,7 @@ def run_server(pool, algo, port=8000):
 pool = create_database_pool()
 
 sim_options = {"name": "cosine", "user_based": False}
-algo = KNNBaseline(sim_options=sim_options)
+algo = CustomKNN(sim_options=sim_options)
 train_knn(algo, pool)
 
 run_server(pool, algo)
