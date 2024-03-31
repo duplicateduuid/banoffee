@@ -1,11 +1,17 @@
 <script lang="ts">
-	import { MoveRight } from 'lucide-svelte';
-	import { superForm } from 'sveltekit-superforms';
-
-	import type { PageData } from './$types';
 	import SignDialog from './SignDialog.svelte';
+	import { QueryCache, createQuery } from '@tanstack/svelte-query';
+	import { me } from "../requests/user"
+	import { type User } from '../schemas/user';
 
-	export let data: PageData;
+	const user = createQuery<User>({
+		queryKey: ['me'],
+		queryFn: me,
+	})
+
+	const cache = new QueryCache();
+
+	console.log(cache.findAll("me"));
 </script>
 
 <svelte:head>
@@ -26,7 +32,8 @@
 					</div>
 					<a href="/bookmarks" class="text-2xl text-[#7A7974]">Bookmarks</a>
 				</div>
-				<SignDialog />
+				
+				{@render signIn()}
 			</header>
 
 			<section class="flex flex-col gap-8">
@@ -52,3 +59,11 @@
 	  </div>
 	</div>
 </section>
+
+{#snippet signIn()}
+	{#if $user.isPending || $user.isSuccess}
+		<div />
+	{:else}
+		<SignDialog />
+	{/if}
+{/snippet}

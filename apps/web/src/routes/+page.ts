@@ -10,10 +10,10 @@ export const load: PageLoad = async ({ parent }) => {
   const signInForm = await superValidate(zod(signInRequestSchema));
   const signUpForm = await superValidate(zod(signInRequestSchema));
 
-  const user = await queryClient.prefetchQuery({
+  await queryClient.prefetchQuery({
     queryKey: ['me'],
     queryFn: me
   })
 
-  return { signInForm, signUpForm, user };
+  return { signInForm, signUpForm };
 };
