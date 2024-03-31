@@ -189,6 +189,11 @@ func (u UserPostgresRepository) CreateUserResource(user *User, resourceId string
 		newStatus = &updatedStatus
 	}
 
+	if newStatus == nil {
+		updatedStatus := "bookmarked"
+		newStatus = &updatedStatus
+	}
+
 	_, err := u.db.Exec(
 		`INSERT INTO "user_resource" (user_id, resource_id, status, review_rating, review_comment)
 		VALUES ($1, $2, $3, $4, $5)`,
