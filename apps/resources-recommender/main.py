@@ -92,18 +92,18 @@ def read_resources_urls():
     return id_to_url, url_to_id
 
 def get_resource_nearest_neighbors(algo, resource_url):
-    id_to_url, name_to_url = read_resources_urls()
+    id_to_url, url_to_id = read_resources_urls()
 
-    raw_id = name_to_url[resource_url]
+    raw_id = url_to_id[resource_url]
     inner_id = algo.trainset.to_inner_iid(raw_id)
 
-    neighbors = algo.get_neighbors(inner_id, k=1)
+    neighbors = algo.get_neighbors(inner_id, k=10)
     neighbors = (
         algo.trainset.to_raw_iid(inner_id) for inner_id in neighbors
     )
     neighbors = (id_to_url[rid] for rid in neighbors)
 
-    return neighbors
+    return list(neighbors)
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
     def __init__(self, pool, algo, *args, **kwargs):
