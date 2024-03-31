@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -38,6 +39,7 @@ func (a *API) AuthMiddleware() gin.HandlerFunc {
 		}
 
 		user, err := a.repositories.userRepository.GetUserById(id)
+		b, err := json.Marshal(user)
 
 		if err != nil {
 			fmt.Printf("[ERROR] [AuthMiddleware] failed to fetch user: %s\n", err)
@@ -46,7 +48,7 @@ func (a *API) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		ctx.Set("user", user)
+		ctx.Set("user", string(b))
 
 		ctx.Next()
 	}

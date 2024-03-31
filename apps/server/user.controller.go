@@ -1,13 +1,43 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
+
+type MeResponse struct {
+	User *User `json:"user" tstype:"User"`
+}
+
+func (*API) user(ctx *gin.Context) (*User, error) {
+	userJson := ctx.GetString("user")
+	var user User
+	err := json.Unmarshal([]byte(userJson), &user)
+
+	return &user, err
+}
+
+func (s *API) handleMe() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		user, err := s.user(ctx)
+
+		if err != nil {
+			fmt.Printf("[ERROR] [UserController.me] failed to get user from context: %s\n", err)
+			ctx.Writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		response := MeResponse{User: user}
+
+		ctx.JSON(http.StatusOK, response)
+	}
+}
 
 type LoginRequest struct {
 	Login    string `json:"login" validate:"required" tstype:"string"`
@@ -143,7 +173,12 @@ func (s *API) handleSaveResource() gin.HandlerFunc {
 			return
 		}
 
-		user := ctx.MustGet("user").(*User)
+		user, err := s.user(ctx)
+
+		if err != nil {
+			ctx.Writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 
 		resource, err := s.repositories.resourceRepository.GetResourceById(resourceId)
 
@@ -201,7 +236,12 @@ func (s *API) handleGetMyResources() gin.HandlerFunc {
 			return
 		}
 
-		user := ctx.MustGet("user").(*User)
+		user, err := s.user(ctx)
+
+		if err != nil {
+			ctx.Writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 
 		if req.Limit == 0 {
 			req.Limit = 10
@@ -248,7 +288,12 @@ func (s *API) handleGetMyResource() gin.HandlerFunc {
 			return
 		}
 
-		user := ctx.MustGet("user").(*User)
+		user, err := s.user(ctx)
+
+		if err != nil {
+			ctx.Writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 
 		_, err = s.repositories.userRepository.GetUserResource(user, resource.Id.String())
 

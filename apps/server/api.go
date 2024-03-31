@@ -43,6 +43,7 @@ func (a *API) SetupRouter() *gin.Engine {
 	router.POST("/login", a.handleLogin())
 	router.POST("/register", a.hanlderRegister())
 
+	authRouter.GET("/me", a.handleMe())
 	authRouter.GET("/resource", a.handleGetResource())
 	authRouter.POST("/resource", a.handleCreateResource())
 
