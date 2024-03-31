@@ -1,10 +1,10 @@
 <script lang="ts">    
   import SignInForm from '$lib/components/SignInForm.svelte';
-	import SignUpForm from '$lib/components/SignUpForm.svelte';
+  import SignUpForm from '$lib/components/SignUpForm.svelte';
   import { createDialog, melt } from '@melt-ui/svelte';
   import { MoveRight, X } from "lucide-svelte";
   import { fade } from 'svelte/transition';
-	import type { User } from '../schemas/user';
+  import type { User } from '../schemas/user';
 
   const {
     elements: {

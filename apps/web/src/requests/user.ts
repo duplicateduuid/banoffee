@@ -4,9 +4,7 @@ import { userSchema } from "../schemas/user";
 export const me = async () => {
   try {
     const { data } = await api.get("/me");
-    const user = userSchema.passthrough().parse(data.user);
-
-    return { user };
+    return userSchema.passthrough().parse(data.user);
   } catch (error) {
     if (error instanceof Error) {
       throw new RequestError(error);

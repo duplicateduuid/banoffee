@@ -1,17 +1,15 @@
 <script lang="ts">
 	import SignDialog from './SignDialog.svelte';
-	import { QueryCache, createQuery } from '@tanstack/svelte-query';
+	import AccountDropdown from './AccountDropdown.svelte';
+	import { createQuery } from '@tanstack/svelte-query';
 	import { me } from "../requests/user"
 	import { type User } from '../schemas/user';
+	import { UserRound } from 'lucide-svelte';
 
 	const user = createQuery<User>({
 		queryKey: ['me'],
 		queryFn: me,
 	})
-
-	const cache = new QueryCache();
-
-	console.log(cache.findAll("me"));
 </script>
 
 <svelte:head>
@@ -62,7 +60,7 @@
 
 {#snippet signIn()}
 	{#if $user.isPending || $user.isSuccess}
-		<div />
+		<AccountDropdown user={$user.data} />
 	{:else}
 		<SignDialog />
 	{/if}
