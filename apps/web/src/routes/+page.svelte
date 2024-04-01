@@ -34,7 +34,7 @@
 			</header>
 
 			<section class="flex flex-col gap-8">
-				<h1 class="font-primary font-bold text-6xl max-w-[50%] tracking-wider">Popular this week</h1>		
+				<h1 class="font-primary font-bold text-6xl max-w-[50%] tracking-wider">You might like</h1>		
 				<div class="flex flex-col gap-4">
 
 					{#each {length: 4} as _, i}
@@ -58,9 +58,13 @@
 </section>
 
 {#snippet signIn()}
-	{#if $user.data}
-		<AccountDropdown user={$user.data} />
-	{:else}
-		<SignDialog />
-	{/if}
+	<div class="col-span-1">
+		{#if !$user.isPending}
+			{#if $user.data}
+				<AccountDropdown user={$user.data} />
+			{:else}
+				<SignDialog />
+			{/if}
+		{/if}
+	</div>
 {/snippet}
