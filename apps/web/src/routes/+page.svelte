@@ -20,9 +20,9 @@
 	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 	  <div class="mx-auto max-w-4xl flex flex-col gap-16">
 			<!-- TODO: create a header component -->
-			<header class="flex justify-between py-8 items-center">
+			<header class="grid grid-cols-4 w-full justify-between py-8 items-center">
 				<span class="font-primary font-bold text-5xl">Banoffee</span>
-				<div class="flex items-center gap-10">
+				<div class="col-span-2 w-full flex items-center justify-center gap-10">
 					<div class="relative flex flex-col items-center">
 						<a href="/discover" class="text-2xl">For you</a>
 						<span class="bg-primary-400 h-1 absolute mt-1 top-full w-[60%] rounded-full" />
@@ -58,7 +58,7 @@
 </section>
 
 {#snippet signIn()}
-	<div class="col-span-1">
+	<div class="flex w-full justify-end">
 		{#if !$user.isPending}
 			{#if $user.data}
 				<AccountDropdown user={$user.data} />

@@ -2,8 +2,7 @@
   import { UserRound } from "lucide-svelte";
   import { type User } from "../schemas/user";
   import { createDropdownMenu, melt } from "@melt-ui/svelte";
-  import { writable } from "svelte/store";
-  import { fade, fly } from "svelte/transition";
+  import { fly } from "svelte/transition";
 
   type Props = {
     user: User
