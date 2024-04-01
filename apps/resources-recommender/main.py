@@ -64,7 +64,7 @@ def generate_datasets(pool):
     pool.putconn(connection)
 
 class CustomKNN(KNNBaseline):
-    # TODO: check performance against default KNNBaseline get_neighbors
+    # TODO: This is pretty slow atm, if not optimized, can lead to high response times in the future if the dataset size gets bigger.
     def get_neighbors_based_on_user(self, item_id, user_id, k):
         user_ratings = [iid for (uid, iid, _) in self.trainset.all_ratings() if uid == self.trainset.to_inner_uid(user_id)]
         others = [(iid, self.sim[item_id, iid]) for iid in self.trainset.all_items() if iid not in user_ratings]
