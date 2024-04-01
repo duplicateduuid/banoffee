@@ -4,7 +4,6 @@
 	import { createQuery } from '@tanstack/svelte-query';
 	import { me } from "../requests/user"
 	import { type User } from '../schemas/user';
-	import { UserRound } from 'lucide-svelte';
 
 	const user = createQuery<User>({
 		queryKey: ['me'],
@@ -25,10 +24,10 @@
 				<span class="font-primary font-bold text-5xl">Banoffee</span>
 				<div class="flex items-center gap-10">
 					<div class="relative flex flex-col items-center">
-						<a href="/discover" class="text-2xl">Discover</a>
+						<a href="/discover" class="text-2xl">For you</a>
 						<span class="bg-primary-400 h-1 absolute mt-1 top-full w-[60%] rounded-full" />
 					</div>
-					<a href="/bookmarks" class="text-2xl text-[#7A7974]">Bookmarks</a>
+					<a href="/bookmarks" class="text-2xl text-[#7A7974]">Discover</a>
 				</div>
 				
 				{@render signIn()}
@@ -59,7 +58,7 @@
 </section>
 
 {#snippet signIn()}
-	{#if $user.isPending || $user.isSuccess}
+	{#if $user.data}
 		<AccountDropdown user={$user.data} />
 	{:else}
 		<SignDialog />
