@@ -332,3 +332,31 @@ func (s *API) handleGetRecommendations() gin.HandlerFunc {
 		ctx.JSON(http.StatusOK, data)
 	}
 }
+
+func (s *API) handleGetPopularThisWeek() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		user, err := s.user(ctx)
+
+		if err != nil {
+			ctx.Writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		resources, err := s.repositories.userRepository.GetPopularThisWeekResources(user)
+
+		if err != nil {
+			fmt.Printf("[ERROR] [API.GetPopularThisWeek] failed to fetch resources: %s", err)
+			ctx.JSON(400, gin.H{"error": "Cannot retrieve resources"})
+			ctx.Abort()
+			return
+		}
+
+		if len(*resources) <= 0 {
+			ctx.JSON(200, gin.H{"resources": []*Resource{}})
+			ctx.Abort()
+			return
+		}
+
+		ctx.JSON(200, gin.H{"resources": resources})
+	}
+}

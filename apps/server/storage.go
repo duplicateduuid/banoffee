@@ -25,6 +25,7 @@ type UserRepository interface {
 	GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error)
 	CreateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
 	UpdateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
+	GetPopularThisWeekResources(user *User) (*[]Resource, error)
 }
 
 type UserPostgresRepository struct {
@@ -227,6 +228,33 @@ func (u UserPostgresRepository) UpdateUserResource(user *User, resourceId string
 	)
 
 	return err
+}
+
+func (u UserPostgresRepository) GetPopularThisWeekResources(user *User) (*[]Resource, error) {
+	resource := new([]Resource)
+
+	err := u.db.Select(
+		resource,
+		`
+		SELECT 
+			r.id, r.url, r.name, r.image_url, r.author, r.description, ur.status, ur.review_rating, ur.review_comment, r.created_at
+		FROM 
+			"user_resource" ur 
+		LEFT JOIN 
+			"resource" r ON r.id = ur.resource_id
+		WHERE
+			ur.review_rating IN ('one', 'two', 'three', 'four', 'five')
+			AND ur.user_id != $1
+			AND ur.created_at >= CURRENT_DATE - INTERVAL '6 days' -- Include today's date
+    		AND ur.created_at < CURRENT_DATE + INTERVAL '1 day' -- Up to the end of today
+		ORDER BY
+			ur.review_rating DESC
+		LIMIT 5
+		`,
+		user.Id,
+	)
+
+	return resource, err
 }
 
 func (r ResourcePostgresRepository) CreateResource(resource *Resource) (*Resource, error) {
