@@ -32,14 +32,16 @@
 				<span class="bg-primary-400 h-full aspect-video rounded-lg" />
 				<div class="flex flex-col justify-between h-full">
 					<div class="flex flex-col">
-						<p class="font-primary text-2xl tracking-wider font-semibold">{$popularResources.data[0].name}</p>
-						<!-- {#if recommendation.description}
-						<p class="text-sm line-clamp-2">{recommendation.description}</p>
-					{/if} -->
+						<p class="font-primary text-2xl tracking-wider font-semibold">
+							{$popularResources.data[0].name}
+						</p>
+						{#if $popularResources.data[0].description}
+							<p class="text-sm line-clamp-2">{$popularResources.data[0].description}</p>
+						{/if}
 					</div>
-					<!-- {#if recommendation.author}
-					<p>{recommendation.author}</p>
-				{/if} -->
+					{#if $popularResources.data[0].author}
+						<p>{$popularResources.data[0].author}</p>
+					{/if}
 				</div>
 			</a>
 			<div class="w-[50%] h-[392px] grid grid-rows-1 grid-cols-2 gap-2">
@@ -52,13 +54,13 @@
 						<div class="flex flex-col justify-between h-full">
 							<div class="flex flex-col">
 								<p class="font-primary text-2xl tracking-wider font-semibold">{resource.name}</p>
-								<!-- {#if recommendation.description}
-							<p class="text-sm line-clamp-2">{recommendation.description}</p>
-						{/if} -->
+								{#if resource.description}
+									<p class="text-sm line-clamp-2">{resource.description}</p>
+								{/if}
 							</div>
-							<!-- {#if recommendation.author}
-						<p>{recommendation.author}</p>
-					{/if} -->
+							{#if resource.author}
+								<p>{resource.author}</p>
+							{/if}
 						</div>
 					</a>
 				{/each}
