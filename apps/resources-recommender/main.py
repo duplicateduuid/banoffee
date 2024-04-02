@@ -64,6 +64,30 @@ def generate_datasets(pool):
 
     pool.putconn(connection)
 
+def get_resource(connection, url):
+    cur = connection.cursor()
+    sql_query = """
+        SELECT 
+            r.id, r.url, r.name, r.image_url, r.author, r.description
+        FROM 
+            "resource" r 
+        WHERE 
+            r.url=%s
+    """
+    cur.execute(sql_query, (url,))
+    result = cur.fetchone()
+
+    result_dict = {
+        'id': result[0],
+        'url': result[1],
+        'name': result[2],
+        'image_url': result[3],
+        'author': result[4],
+        'description': result[5]
+    }
+
+    return result_dict
+
 class CustomKNN(KNNBaseline):
     def custom_get_neighbors(self, item_id, user_id, exclude_list, k):
         user_ratings = {iid for (iid, _) in self.trainset.ur[self.trainset.to_inner_uid(user_id)]}
@@ -175,7 +199,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
             
             # Sort recommendations by score
             recommendations = heapq.nlargest(len(recommendations), recommendations, key=lambda tple: tple[1])
-            recommendations = [url for (url, _) in recommendations]
+            recommendations = [get_resource(connection, url) for (url, _) in recommendations]
 
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
