@@ -1,10 +1,19 @@
 import { z } from "zod";
+import type { Cookies } from "@sveltejs/kit";
 import { RequestError, api } from "../api";
 import { resourceSchema, userSchema } from "../schemas/user";
 
-export const me = async () => {
+export const me = async (cookies?: Cookies) => {
+  const sessionId = cookies?.get("sessionId");
+  
+  const config = sessionId
+    ? {
+      headers: { Cookie: `sessionId=${sessionId}`}
+    }
+    : undefined;  
+
   try {
-    const { data } = await api.get("/me");
+    const { data } = await api.get("/me", config);
     return userSchema.passthrough().parse(data.user);
   } catch (error) {
     if (error instanceof Error) {

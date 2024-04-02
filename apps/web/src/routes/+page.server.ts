@@ -1,7 +1,7 @@
 import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { signInRequest, signInRequestSchema, signUpRequest, signUpRequestSchema } from "../requests/auth";
-import { fail, redirect, type Actions } from "@sveltejs/kit";
+import { fail, type Actions } from "@sveltejs/kit";
 import { RequestError } from "../api";
 
 export const actions: Actions = {

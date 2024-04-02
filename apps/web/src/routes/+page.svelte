@@ -4,10 +4,14 @@
 	import { createQuery } from '@tanstack/svelte-query';
 	import { getRecommendations, me } from "../requests/user"
 	import { type Resource, type User } from '../schemas/user';
+	import type { PageData } from './$types';
 
+	export let data: PageData; 
+	
 	const user = createQuery<User>({
 		queryKey: ['me'],
-		queryFn: me,
+		queryFn: () => me(),
+		initialData: data.user
 	})
 
 	const recommendations = createQuery<Resource[]>({
@@ -75,6 +79,8 @@
 			{:else}
 				<SignDialog />
 			{/if}
+		{:else}
+			pending hehe
 		{/if}
 	</div>
 {/snippet}
