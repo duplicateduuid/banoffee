@@ -342,21 +342,32 @@ func (s *API) handleGetPopularThisWeek() gin.HandlerFunc {
 			return
 		}
 
-		resources, err := s.repositories.userRepository.GetPopularThisWeekResources(user)
+		results := new([]Resource)
+		offset := 1
 
-		if err != nil {
-			fmt.Printf("[ERROR] [API.GetPopularThisWeek] failed to fetch resources: %s", err)
-			ctx.JSON(400, gin.H{"error": "Cannot retrieve resources"})
-			ctx.Abort()
-			return
+		for offset <= 4 {
+			resources, err := s.repositories.userRepository.GetPopularThisWeekResources(user, offset)
+
+			if err != nil {
+				fmt.Printf("[ERROR] [API.GetPopularThisWeek] failed to fetch resources: %s", err)
+				break
+			}
+
+			if len(*resources) <= 0 {
+				offset += 1
+				continue
+			}
+
+			results = resources
+			break
 		}
 
-		if len(*resources) <= 0 {
+		if len(*results) <= 0 {
 			ctx.JSON(200, gin.H{"resources": []*Resource{}})
 			ctx.Abort()
 			return
 		}
 
-		ctx.JSON(200, gin.H{"resources": resources})
+		ctx.JSON(200, gin.H{"resources": results})
 	}
 }
