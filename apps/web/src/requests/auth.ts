@@ -17,8 +17,8 @@ export const signInRequest = async (payload: SignInRequestType) => {
   try {
     const { data } = await api.post("/login", payload);
 
-    const user = userSchema.passthrough().parse(data.user);
-    return { user };
+    const sessionId = z.string().parse(data.sessionId);
+    return { sessionId }
   } catch (e) {
     if (e instanceof Error) {
       throw new RequestError(e);
@@ -46,10 +46,9 @@ export type SignUpRequestType = z.infer<typeof signUpRequestSchema>;
 export const signUpRequest = async (payload: SignUpRequestType) => {      
   try {
     const { data } = await api.post("/register", payload);
-    
-    const user = userSchema.passthrough().parse(data.user);
 
-    return { user };
+    const sessionId = z.string().parse(data.sessionId);
+    return { sessionId };
   } catch (e) {
     if (e instanceof Error) {
       throw new RequestError(e);

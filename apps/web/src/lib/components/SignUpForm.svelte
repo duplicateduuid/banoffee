@@ -1,21 +1,15 @@
 <script lang="ts">  
-  type Props = { onSignIn: () => void, onSubmitted: () => void };
-  let { onSignIn, onSubmitted } = $props<Props>();
-
 	import { ChevronLeft } from 'lucide-svelte';
-  import { createForm } from 'felte';
-  import { validator } from '@felte/validator-zod';
-	import { type SignUpRequestType, signUpRequestSchema, signUpRequest } from '../../requests/auth';
+	import { superForm } from 'sveltekit-superforms';
+  import { page } from "$app/stores";
 
-  const { form, errors } = createForm<SignUpRequestType>({
-    extend: [validator({ schema: signUpRequestSchema })],
-    onSubmit: async (fields) => {
-      const { user } = await signUpRequest(fields);
-      localStorage.setItem("user", JSON.stringify(user));
+  type Props = {
+    onSignIn: () => void,
+  };
 
-      onSubmitted();
-    }
-  })
+  let { onSignIn }: Props = $props();
+
+  const { form, errors, constraints, message, enhance } = superForm($page.data.signUpForm);
 
   type Step =
     | "ask-sign-alternative"
@@ -56,7 +50,7 @@
 {#snippet alternatives()}
   <div class="flex flex-col gap-2.5 w-full">
     <button
-      class="w-full w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center bg-stone-800 hover:bg-stone-700 text-white transition"
+      class="w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center bg-stone-800 hover:bg-stone-700 text-white transition"
     >
       <div class="flex items-center gap-4">
         <img src="/icons/google.svg" alt="google icon" class="h-6 w-6" />
@@ -66,7 +60,7 @@
 
 
     <button
-      class="w-full w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center bg-stone-800 hover:bg-stone-700 text-white transition"
+      class="w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center bg-stone-800 hover:bg-stone-700 text-white transition"
     >
       <div class="flex items-center gap-4">
         <img src="/icons/apple-white.svg" alt="google icon" class="h-6 w-6" />
@@ -81,23 +75,18 @@
 
   <button
     onclick={() => step = "sign-with-email"}
-    class="w-full w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center transition"
+    class="w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center transition"
   >
       Continue with email
   </button>
 
-  <!--
-  { @html
-    TODO: display a general error message here
-    {#if $message}
-      <div class="w-full">
-        <p class="bg-red-200 rounded-lg px-4 py-2 text-red-600 font-semibold text-center">
-          {$message}
-        </p>
-      </div>
-    {/if}
-  }
-  -->
+  {#if $message}
+    <div class="w-full">
+      <p class="bg-red-200 rounded-lg px-4 py-2 text-red-600 font-semibold text-center">
+        {$message}
+      </p>
+    </div>
+  {/if}
 
   {@render signIn()}
 {/snippet}
@@ -117,7 +106,9 @@
 
 {#snippet emailForm()}
   <form
-    use:form
+    use:enhance
+    method="POST"
+    action="?/signUp"
     class="w-full flex flex-col gap-8"
   >
     <div class="flex flex-col gap-4 w-full">
@@ -126,6 +117,9 @@
         <input
           id="username"
           name="username"
+          aria-invalid={$errors.username ? 'true' : undefined}
+          bind:value={$form.username}
+          {...$constraints.username}
           class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
             outline-0 transition border-solid border {
               $errors.username
@@ -136,7 +130,7 @@
 
         {#if $errors.username}
           <p class="text-rose-500 text-xs font-semibold">
-            {$errors.username[0]}
+            {$errors.username}
           </p>
         {/if}
       </fieldset>
@@ -147,6 +141,9 @@
         <input
           id="email"
           name="email"
+          aria-invalid={$errors.email ? 'true' : undefined}
+          bind:value={$form.email}
+          {...$constraints.email}
           class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
             outline-0 transition border-solid border {
               $errors.email
@@ -157,7 +154,7 @@
 
         {#if $errors.email}
           <p class="text-rose-500 text-xs font-semibold">
-            {$errors.email[0]}
+            {$errors.email}
           </p>
         {/if}
       </fieldset>
@@ -168,6 +165,9 @@
           id="password"
           name="password"
           type="password"
+          aria-invalid={$errors.password ? 'true' : undefined}
+          bind:value={$form.password}
+          {...$constraints.password}
           class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
             outline-0 transition border-solid border {
               $errors.password
@@ -177,7 +177,7 @@
         />
         {#if $errors.password}
           <p class="text-rose-500 text-xs font-semibold">
-            {$errors.password[0]}
+            {$errors.password}
           </p>
         {/if}
       </fieldset>
@@ -191,7 +191,7 @@
       <button
         type="submit"
         class="py-3 items-center justify-center rounded-lg bg-primary-400 hover:bg-primary-300
-          text-white font-semibold px-4 font-medium leading-none text-magnum-900 shadow"
+          text-white font-semibold px-4 leading-none text-magnum-900 shadow"
       >
         Sign in
       </button>

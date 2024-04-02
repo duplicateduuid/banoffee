@@ -1,11 +1,11 @@
 import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { signInRequest, signInRequestSchema, signUpRequest, signUpRequestSchema } from "../requests/auth";
-import { fail, type Actions } from "@sveltejs/kit";
+import { fail, redirect, type Actions } from "@sveltejs/kit";
 import { RequestError } from "../api";
 
 export const actions: Actions = {
-  signIn: async ({ request }) => {
+  signIn: async ({ request, cookies }) => {
     const form = await superValidate(request, zod(signInRequestSchema));
 
     if (!form.valid) {
@@ -13,11 +13,12 @@ export const actions: Actions = {
     }
 
     try {
-      const user = await signInRequest(form.data);
+      const { sessionId } = await signInRequest(form.data);
+     // TODO: setting cookies manually? this doesn't seems right.
+      cookies.set('sessionId', sessionId, { path: "/" })
 
-      return user
+      return { form }
     } catch (error) {
-      console.log(error)      
       const isRequestError = error instanceof RequestError;
 
       if (!isRequestError) {
@@ -45,10 +46,12 @@ export const actions: Actions = {
     }
 
     try {
-      await signUpRequest(form.data);
-      console.log({ cookies: cookies.getAll() })
+      const { sessionId } = await signUpRequest(form.data);
+      // TODO: same here
+      cookies.set("sessionId", sessionId, { path: "/" });
+
+      return { form }
     } catch (error) {
-      console.log(error)      
       const isRequestError = error instanceof RequestError;
 
       if (!isRequestError) {
