@@ -46,8 +46,8 @@ func (a *API) SetupRouter() *gin.Engine {
 	authRouter.GET("/me", a.handleMe())
 	authRouter.GET("/resource", a.handleGetResource())
 	authRouter.POST("/resource", a.handleCreateResource())
-
 	authRouter.GET("/resource/search", a.handleSearchResource())
+
 	authRouter.GET("/user/resources", a.handleGetMyResources())
 	authRouter.GET("/user/resource", a.handleGetMyResource())
 	authRouter.POST("/user/resource/:id", a.handleSaveResource())

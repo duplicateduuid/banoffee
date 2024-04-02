@@ -58,6 +58,10 @@ func (s *API) handleSearchResource() gin.HandlerFunc {
 			return
 		}
 
+		if limit == 0 {
+			limit = 10
+		}
+
 		req := SearchResourceRequest{
 			Name:   ctx.Query("name"),
 			Limit:  limit,

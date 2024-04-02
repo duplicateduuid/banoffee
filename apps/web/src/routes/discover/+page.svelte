@@ -2,11 +2,12 @@
 	import SearchBar from '../SearchBar.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { getPopularThisWeek } from '../../requests/user';
-	import type { Resource } from '../../schemas/user';
+	import type { Resource } from '../../schemas/resource';
 
 	const popularResources = createQuery<Resource[]>({
 		queryKey: ['popular-this-week'],
-		queryFn: getPopularThisWeek
+		queryFn: getPopularThisWeek,
+		staleTime: 0
 	});
 </script>
 

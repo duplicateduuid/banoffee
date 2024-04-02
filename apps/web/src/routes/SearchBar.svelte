@@ -14,7 +14,7 @@
 
 	const { form } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
-		onSubmit: (values) => goto(`/search?url=${values.search}`)
+		onSubmit: (values) => goto(`/search?search=${values.search}`)
 	});
 </script>
 
@@ -42,7 +42,6 @@
 			name="search"
 			id="default-search"
 			class="block w-full p-4 ps-10 text-sm font-primary text-gray-900 border border-gray-300 rounded-lg bg-gray-50 outline-none"
-			placeholder="Insert the URL here"
 			required
 		/>
 		<button

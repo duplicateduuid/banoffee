@@ -1,7 +1,8 @@
 import { z } from "zod";
 import type { Cookies } from "@sveltejs/kit";
 import { RequestError, api } from "../api";
-import { resourceSchema, userSchema } from "../schemas/user";
+import { userSchema } from "../schemas/user";
+import { resourceSchema } from "../schemas/resource";
 
 export const me = async (cookies?: Cookies) => {
   const sessionId = cookies?.get("sessionId");
