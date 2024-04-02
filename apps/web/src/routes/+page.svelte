@@ -2,19 +2,13 @@
 	import SignDialog from './SignDialog.svelte';
 	import AccountDropdown from './AccountDropdown.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
-	import { getRecommendations, me } from "../requests/user"
-	import { type Resource, type User } from '../schemas/user';
+	import { getRecommendations } from "../requests/user"
+	import { type Resource } from '../schemas/user';
 	import type { PageData } from './$types';
 
 	export let data: PageData; 
+	const { user } = data;
 	
-	const user = createQuery<User>({
-		queryKey: ['me'],
-		queryFn: () => me(),
-		// TODO: fix this disgusting ts error. (it should be working without the `as User`)
-		initialData: (data.user || undefined) as User
-	})
-
 	const recommendations = createQuery<Resource[]>({
 		queryKey: ['recommendations'],
 		queryFn: getRecommendations
@@ -74,14 +68,10 @@
 
 {#snippet signIn()}
 	<div class="flex w-full justify-end">
-		{#if !$user.isPending}
-			{#if $user.data}
-				<AccountDropdown user={$user.data} />
-			{:else}
-				<SignDialog />
-			{/if}
+		{#if user}
+			<AccountDropdown user={user} />
 		{:else}
-			pending hehe
+			<SignDialog />
 		{/if}
 	</div>
 {/snippet}

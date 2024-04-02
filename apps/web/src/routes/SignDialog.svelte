@@ -5,6 +5,7 @@
   import { MoveRight, X } from "lucide-svelte";
   import { fade } from 'svelte/transition';
   import type { User } from '../schemas/user';
+	import { invalidateAll } from '$app/navigation';
 
   const {
     elements: {
@@ -52,12 +53,12 @@
       {#if formType === "sign-in"}
         <SignInForm
           onSignUp={() => formType = "sign-up"}
-          onSubmitted={() => open.set(false)}
+          onSubmitted={() => { open.set(false); invalidateAll(); }}
         />
         {:else if formType === "sign-up"}
         <SignUpForm 
           onSignIn={() => formType = "sign-in"}
-          onSubmitted={() => open.set(false)}
+          onSubmitted={() => { open.set(false); invalidateAll(); }}
         />
       {/if}
     </div>
