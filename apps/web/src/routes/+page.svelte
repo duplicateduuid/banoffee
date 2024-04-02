@@ -11,7 +11,8 @@
 	const user = createQuery<User>({
 		queryKey: ['me'],
 		queryFn: () => me(),
-		initialData: data.user
+		// TODO: fix this disgusting ts error. (it should be working without the `as User`)
+		initialData: (data.user || undefined) as User
 	})
 </script>
 
