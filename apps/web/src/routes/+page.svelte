@@ -4,10 +4,14 @@
 	import { createQuery } from '@tanstack/svelte-query';
 	import { me } from "../requests/user"
 	import { type User } from '../schemas/user';
+	import type { PageData } from './$types';
 
+	export let data: PageData; 
+	
 	const user = createQuery<User>({
 		queryKey: ['me'],
-		queryFn: me,
+		queryFn: () => me(),
+		initialData: data.user
 	})
 </script>
 
@@ -65,6 +69,8 @@
 			{:else}
 				<SignDialog />
 			{/if}
+		{:else}
+			pending hehe
 		{/if}
 	</div>
 {/snippet}
