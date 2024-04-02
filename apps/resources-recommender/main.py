@@ -1,5 +1,6 @@
 import heapq
 import os
+from urllib.parse import parse_qs, urlparse
 
 import psycopg2
 from psycopg2 import pool
@@ -63,18 +64,42 @@ def generate_datasets(pool):
 
     pool.putconn(connection)
 
+def get_resource(connection, url):
+    cur = connection.cursor()
+    sql_query = """
+        SELECT 
+            r.id, r.url, r.name, r.image_url, r.author, r.description
+        FROM 
+            "resource" r 
+        WHERE 
+            r.url=%s
+    """
+    cur.execute(sql_query, (url,))
+    result = cur.fetchone()
+
+    result_dict = {
+        'id': result[0],
+        'url': result[1],
+        'name': result[2],
+        'image_url': result[3],
+        'author': result[4],
+        'description': result[5]
+    }
+
+    return result_dict
+
 class CustomKNN(KNNBaseline):
-    # TODO: This is pretty slow atm, if not optimized, can lead to high response times in the future if the dataset size gets bigger.
-    def get_neighbors_based_on_user(self, item_id, user_id, k):
-        user_ratings = [iid for (uid, iid, _) in self.trainset.all_ratings() if uid == self.trainset.to_inner_uid(user_id)]
-        others = [(iid, self.sim[item_id, iid]) for iid in self.trainset.all_items() if iid not in user_ratings]
-        others = heapq.nlargest(k, others, key=lambda tple: tple[1])
-        k_nearest_neighbors = [j for (j, _) in others]
+    def custom_get_neighbors(self, item_id, user_id, exclude_list, k):
+        user_ratings = {iid for (iid, _) in self.trainset.ur[self.trainset.to_inner_uid(user_id)]}
+        others = [(iid, self.sim[item_id, iid]) for iid in self.trainset.all_items() if iid not in user_ratings and iid not in exclude_list]
+        k_nearest_neighbors = heapq.nlargest(k, others, key=lambda tple: tple[1])
 
         return k_nearest_neighbors
  
 def train_knn(algo, pool):
     generate_datasets(pool)
+
+    id_to_url, url_to_id = read_resources_urls()
 
     file_path = os.path.expanduser("./datasets/ratings.csv")
     reader = Reader(line_format="user item rating", sep=",", skip_lines=1)
@@ -83,6 +108,8 @@ def train_knn(algo, pool):
 
     trainset = data.build_full_trainset()
     algo.fit(trainset)
+
+    return id_to_url, url_to_id
 
 def read_resources_urls():
     file_name = "./datasets/resources.csv"
@@ -102,51 +129,98 @@ def read_resources_urls():
     
     return id_to_url, url_to_id
 
-def get_resource_nearest_neighbors(algo, resource_url, user_id):
-    # TODO: move this to train_knn, we don't want to create this every time
-    id_to_url, url_to_id = read_resources_urls()
-
+def get_resource_nearest_neighbors(algo, id_to_url, url_to_id, resource_url, user_id, exclude_url_list, k=10):
     raw_id = url_to_id[resource_url]
     inner_id = algo.trainset.to_inner_iid(raw_id)
 
-    neighbors = algo.get_neighbors_based_on_user(inner_id, user_id, k=10)
+    exclude_list = [algo.trainset.to_inner_iid(url_to_id[url]) for (url, _) in exclude_url_list]
+    neighbors = algo.custom_get_neighbors(inner_id, user_id, exclude_list, k)
     neighbors = (
-        algo.trainset.to_raw_iid(inner_id) for inner_id in neighbors
+        (algo.trainset.to_raw_iid(inner_id), score) for (inner_id, score) in neighbors
     )
-    neighbors = (id_to_url[rid] for rid in neighbors)
+    neighbors = ((id_to_url[rid], score) for (rid,score) in neighbors)
 
     return list(neighbors)
 
+def calculate_items_per_query(query_results_length, n):
+    max_items_per_query = min(n, 5)
+    items_per_query = min(max_items_per_query, max(1, n // query_results_length))
+    
+    return items_per_query
+
 class HTTPRequestHandler(BaseHTTPRequestHandler):
-    def __init__(self, pool, algo, *args, **kwargs):
+    def __init__(self, pool, algo, id_to_url, url_to_id, *args, **kwargs):
         self.pool = pool
         self.algo = algo
+        self.id_to_url = id_to_url
+        self.url_to_id = url_to_id
         super().__init__(*args, **kwargs)
 
+    # TODO: do some sort of pagination with offset here
     def do_GET(self):
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length)
-        json_data = json.loads(post_data.decode('utf-8'))
+        parsed_url = urlparse(self.path)
+        query_params = parse_qs(parsed_url.query)
 
-        user_id = json_data.get('user', '')
-        # TODO: get resource from db based on user
-        resource_url = json_data.get('resource', '')
+        user_id = parsed_url.path.strip('/')
+        limit = int(query_params.get('limit', [''])[0] or 10)
 
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
-        self.end_headers()
+        connection = self.pool.getconn()
         
         try:
-            nearest_neighbors = get_resource_nearest_neighbors(algo, resource_url, user_id)
-            response_json = json.dumps(nearest_neighbors)
-            self.wfile.write(response_json.encode('utf-8'))
-        except:
-            response_json = json.dumps({ 'error': 'Cannot find any recommendations' })
-            self.wfile.write(response_json.encode('utf-8'))
+            cur = connection.cursor()
+            sql_query = sql_query = """
+                SELECT 
+                    r.url
+                FROM 
+                    user_resource ur
+                LEFT JOIN 
+                    resource r ON r.id = ur.resource_id
+                WHERE 
+                    ur.user_id = %s
+                ORDER BY ur.updated_at DESC
+                LIMIT 5;
+            """
+            cur.execute(sql_query, (user_id,))
+            results = cur.fetchall()
 
-def run_server(pool, algo, port=8000):
+            if len(results) <= 0:
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                response_json = json.dumps({ 'recommendations': [] })
+                self.wfile.write(response_json.encode('utf-8'))
+                return
+
+            recommendations = []
+
+            for row in results:
+                nearest_neighbors = get_resource_nearest_neighbors(algo, self.id_to_url, self.url_to_id, row[0], user_id, recommendations, calculate_items_per_query(len(results), limit))
+                recommendations.extend(nearest_neighbors)
+            
+            # Sort recommendations by score
+            recommendations = heapq.nlargest(len(recommendations), recommendations, key=lambda tple: tple[1])
+            recommendations = [get_resource(connection, url) for (url, _) in recommendations]
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            response_json = json.dumps({ 'recommendations': recommendations })
+            self.wfile.write(response_json.encode('utf-8'))
+        except Exception as error:
+            print(f"An exception occurred: {repr(error)} while trying to get recommendations for the user: {user_id}")
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            response_json = json.dumps({ 'recommendations': [] })
+            self.wfile.write(response_json.encode('utf-8'))
+        finally:
+            self.pool.putconn(connection)
+
+
+def run_server(pool, algo, id_to_url, url_to_id, port=8000):
     server_address = ('', port)
-    httpd = HTTPServer(server_address, lambda *args, **kwargs: HTTPRequestHandler(pool, algo, *args, **kwargs))
+    httpd = HTTPServer(server_address, lambda *args, **kwargs: HTTPRequestHandler(pool, algo, id_to_url, url_to_id, *args, **kwargs))
     print(f'Starting server on port {port}...')
     httpd.serve_forever()
 
@@ -154,6 +228,6 @@ pool = create_database_pool()
 
 sim_options = {"name": "cosine", "user_based": False}
 algo = CustomKNN(sim_options=sim_options)
-train_knn(algo, pool)
+id_to_url, url_to_id = train_knn(algo, pool)
 
-run_server(pool, algo)
+run_server(pool, algo, id_to_url, url_to_id)

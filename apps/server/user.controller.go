@@ -305,3 +305,30 @@ func (s *API) handleGetMyResource() gin.HandlerFunc {
 		ctx.JSON(200, gin.H{"resource": resource, "user_holds": true})
 	}
 }
+
+func (s *API) handleGetRecommendations() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		user, err := s.user(ctx)
+
+		if err != nil {
+			ctx.Writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		// TODO: get recommendations system URL from .env
+		resp, err := http.Get("http://localhost:8000/" + user.Id.String())
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch recommendations from the system"})
+			return
+		}
+		defer resp.Body.Close()
+
+		var data interface{}
+		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse response body as JSON"})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, data)
+	}
+}
