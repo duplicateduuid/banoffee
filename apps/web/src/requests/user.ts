@@ -37,3 +37,17 @@ export const getRecommendations = async () => {
     throw new RequestError(new Error("unexpected error"));
   }
 }
+
+export const getPopularThisWeek = async () => {
+  try {
+    const { data } = await api.get("/popular");
+
+    return z.array(resourceSchema).parse(data.resources);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new RequestError(error);
+    }
+
+    throw new RequestError(new Error("unexpected error"));
+  }
+}
