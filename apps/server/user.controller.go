@@ -45,7 +45,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	User *User `json:"user" tstype:"User"`
+	User      *User  `json:"user" tstype:"User"`
+	SessionId string `json:"sessionId" tstype:"string"`
 }
 
 func (s *API) handleLogin() gin.HandlerFunc {
@@ -78,9 +79,15 @@ func (s *API) handleLogin() gin.HandlerFunc {
 			return
 		}
 
-		login(user, ctx, s.repositories.redis)
+		sessionId, err := login(user, ctx, s.repositories.redis)
 
-		response := LoginResponse{User: user}
+		if err != nil {
+			fmt.Printf("[ERROR] [UserController.login] failed to set redis session: %s\n", err)
+			ctx.JSON(500, gin.H{"error": "unexpected error"})
+			return
+		}
+
+		response := LoginResponse{User: user, SessionId: sessionId}
 		ctx.JSON(200, response)
 	}
 }
@@ -95,7 +102,8 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	User *User `json:"user" tstype:"User"`
+	User      *User  `json:"user" tstype:"User"`
+	SessionId string `json:"sessionId" tstype:"string"`
 }
 
 func (s *API) hanlderRegister() gin.HandlerFunc {
@@ -130,25 +138,31 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 			return
 		}
 
-		login(user, ctx, s.repositories.redis)
+		sessionId, err := login(user, ctx, s.repositories.redis)
 
-		response := RegisterResponse{User: user}
+		if err != nil {
+			fmt.Printf("[ERROR] [UserController.login] failed to set redis session: %s\n", err)
+			ctx.JSON(500, gin.H{"error": "unexpected error"})
+			return
+		}
+
+		response := RegisterResponse{User: user, SessionId: sessionId}
 		ctx.JSON(200, response)
 	}
 }
 
 // TODO: move somewhere else
-func login(user *User, ctx *gin.Context, redis *redis.Client) {
-	session_id := uuid.New().String()
+func login(user *User, ctx *gin.Context, redis *redis.Client) (string, error) {
+	sessionId := uuid.New().String()
 
-	err := redis.Set(ctx, session_id, user.Id.String(), 0).Err()
+	err := redis.Set(ctx, sessionId, user.Id.String(), 0).Err()
 	if err != nil {
-		fmt.Printf("[ERROR] [UserController.login] failed to set redis session: %s\n", err)
-		ctx.JSON(500, gin.H{"error": "unexpected error"})
-		return
+		return "", err
 	}
 
-	ctx.SetCookie("sessionId", session_id, 3600*24, "/", "localhost", false, false)
+	ctx.SetCookie("sessionId", sessionId, 3600*24, "/", "localhost", false, false)
+
+	return sessionId, err
 }
 
 type SaveResourcePayload struct {
