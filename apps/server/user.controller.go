@@ -349,18 +349,11 @@ func (s *API) handleGetRecommendations() gin.HandlerFunc {
 
 func (s *API) handleGetPopularThisWeek() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		user, err := s.user(ctx)
-
-		if err != nil {
-			ctx.Writer.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
 		results := new([]Resource)
 		offset := 1
 
 		for offset <= 4 {
-			resources, err := s.repositories.userRepository.GetPopularThisWeekResources(user, offset)
+			resources, err := s.repositories.userRepository.GetPopularThisWeekResources(offset)
 
 			if err != nil {
 				fmt.Printf("[ERROR] [API.GetPopularThisWeek] failed to fetch resources: %s", err)

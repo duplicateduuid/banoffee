@@ -42,6 +42,7 @@ func (a *API) SetupRouter() *gin.Engine {
 	router.GET("/health-check", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })
 	router.POST("/login", a.handleLogin())
 	router.POST("/register", a.hanlderRegister())
+	router.GET("/popular", a.handleGetPopularThisWeek())
 
 	authRouter.GET("/me", a.handleMe())
 	authRouter.GET("/resource", a.handleGetResource())
@@ -52,7 +53,6 @@ func (a *API) SetupRouter() *gin.Engine {
 	authRouter.GET("/user/resource", a.handleGetMyResource())
 	authRouter.POST("/user/resource/:id", a.handleSaveResource())
 	authRouter.GET("/recommendations", a.handleGetRecommendations())
-	authRouter.GET("/popular", a.handleGetPopularThisWeek())
 
 	return router
 }

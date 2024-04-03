@@ -25,7 +25,7 @@ type UserRepository interface {
 	GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error)
 	CreateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
 	UpdateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
-	GetPopularThisWeekResources(user *User, offset int) (*[]Resource, error)
+	GetPopularThisWeekResources(offset int) (*[]Resource, error)
 }
 
 type UserPostgresRepository struct {
@@ -230,7 +230,7 @@ func (u UserPostgresRepository) UpdateUserResource(user *User, resourceId string
 	return err
 }
 
-func (u UserPostgresRepository) GetPopularThisWeekResources(user *User, offset int) (*[]Resource, error) {
+func (u UserPostgresRepository) GetPopularThisWeekResources(offset int) (*[]Resource, error) {
 	resource := new([]Resource)
 	include_days := offset * 6
 
@@ -245,14 +245,12 @@ func (u UserPostgresRepository) GetPopularThisWeekResources(user *User, offset i
 			"resource" r ON r.id = ur.resource_id
 		WHERE
 			ur.review_rating IN ('one', 'two', 'three', 'four', 'five')
-			AND ur.user_id != $1
-			AND ur.created_at >= CURRENT_DATE - ($2 || 'DAYS')::INTERVAL -- Include today's date
+			AND ur.created_at >= CURRENT_DATE - ($1 || 'DAYS')::INTERVAL -- Include today's date
     		AND ur.created_at < CURRENT_DATE + INTERVAL '1 day' -- Up to the end of today
 		ORDER BY
 			ur.review_rating DESC
 		LIMIT 5
 		`,
-		user.Id,
 		include_days,
 	)
 

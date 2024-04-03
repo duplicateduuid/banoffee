@@ -18,6 +18,8 @@ export const getResourceByURL = async (url: string) => {
 
 export const searchResourcesByName = async (name: string, offset: number) => {
 	try {
+		console.log(offset);
+
 		const { data } = await api.get(`/resource/search?name=${name}&limit=10&offset=${offset}`);
 
 		return z.array(resourceSchema).parse(data.resources);
