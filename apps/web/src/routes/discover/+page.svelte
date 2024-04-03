@@ -1,9 +1,10 @@
 <script lang="ts">
-	import SearchBar from '../../lib/components/SearchBar.svelte';
+	import SearchBar from '$lib/components/SearchBar.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { getPopularThisWeek } from '../../requests/user';
 	import type { Resource } from '../../schemas/resource';
-	import Card from '../../lib/components/Card.svelte';
+	import Card from '$lib/components/Card.svelte';
+	import SkeletonCard from '$lib/components/SkeletonCard.svelte';
 
 	const popularResources = createQuery<Resource[]>({
 		queryKey: ['popular-this-week'],
@@ -22,10 +23,19 @@
 
 	<SearchBar className="mb-4" />
 
-	<!-- TODO: add loading state/UI -->
-	{#if !$popularResources.isPending && $popularResources.data && $popularResources.data.length > 0}
+	{#if $popularResources.isPending || ($popularResources.data && $popularResources.data.length > 0)}
 		<p class="font-primary font-bold text-2xl tracking-wider">Popular this week</p>
+	{/if}
 
+	{#if $popularResources.isPending && !$popularResources.data}
+		<div class="flex flex-col gap-4">
+			{#each { length: 2 } as _}
+				<SkeletonCard />
+			{/each}
+		</div>
+	{/if}
+
+	{#if !$popularResources.isPending && $popularResources.data && $popularResources.data.length > 0}
 		<div class="flex gap-2">
 			<Card
 				className="w-[50%] flex flex-col gap-4 h-[392px] shadow px-8 py-6 rounded-lg bg-white"
