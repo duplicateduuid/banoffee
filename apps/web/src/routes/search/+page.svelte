@@ -26,8 +26,10 @@
 		queryKey: ['search'],
 		queryFn: ({ pageParam }) => searchResourcesByName(search || '', pageParam as number),
 		initialPageParam: 0,
-		getNextPageParam: (lastPage) => {
-			return undefined;
+		getNextPageParam: (lastPage, allPages) => {
+			if (!lastPage) return undefined;
+
+			return lastPage.length !== 0 ? allPages.length * 10 : undefined;
 		},
 		enabled: !isURL,
 		staleTime: 0,
@@ -74,6 +76,8 @@
 					/>
 				{/each}
 			{/each}
+
+			<button on:click={() => $searchQuery.fetchNextPage()}>Get more</button>
 		</div>
 	{/if}
 </section>

@@ -20,7 +20,7 @@
     }
   }}
   method="POST"
-  action="?/signIn"
+  action="/?/signIn"
   class="flex flex-col items-center w-full gap-8 pt-8 pb-6"
 >
   <h2 class="font-bold font-primary text-3xl w-full px-8">
