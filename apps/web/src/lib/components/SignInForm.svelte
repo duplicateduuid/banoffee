@@ -12,7 +12,13 @@
 </script>
 
 <form
-  use:enhance
+  use:enhance={{onResult: () => {
+      // TODO: find a better way to reload the page.
+      // had tried invalidateAll(), but the user is loaded in the server side;
+      // had also tried goto("/"), but im already at "/", so nothing happens; 
+      window.location.reload()
+    }
+  }}
   method="POST"
   action="?/signIn"
   class="flex flex-col items-center w-full gap-8 pt-8 pb-6"

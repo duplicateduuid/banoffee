@@ -106,7 +106,13 @@
 
 {#snippet emailForm()}
   <form
-    use:enhance
+    use:enhance={{onResult: () => {
+        // TODO: find a better way to reload the page.
+        // had tried invalidateAll(), but the user is loaded in the server side;
+        // had also tried goto("/"), but im already at "/", so nothing happens;
+        window.location.reload()
+      }
+    }}
     method="POST"
     action="?/signUp"
     class="w-full flex flex-col gap-8"
