@@ -4,7 +4,7 @@
 	import type { Resource } from '../../schemas/resource';
 	import { isValidUrl } from '../../utils';
 	import { createQuery, createInfiniteQuery } from '@tanstack/svelte-query';
-	import Card from '../Card.svelte';
+	import Card from '../../lib/components/Card.svelte';
 
 	const search = $page.url.searchParams.get('search');
 	const isURL = isValidUrl(search || '');

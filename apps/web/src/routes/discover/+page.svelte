@@ -1,9 +1,9 @@
 <script lang="ts">
-	import SearchBar from '../SearchBar.svelte';
+	import SearchBar from '../../lib/components/SearchBar.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { getPopularThisWeek } from '../../requests/user';
 	import type { Resource } from '../../schemas/resource';
-	import Card from '../Card.svelte';
+	import Card from '../../lib/components/Card.svelte';
 
 	const popularResources = createQuery<Resource[]>({
 		queryKey: ['popular-this-week'],
