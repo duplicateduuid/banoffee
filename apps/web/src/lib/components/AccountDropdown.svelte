@@ -1,6 +1,6 @@
 <script lang="ts">
   import { UserRound } from "lucide-svelte";
-  import { type User } from "../schemas/user";
+  import { type User } from "../../schemas/user";
   import { createDropdownMenu, melt } from "@melt-ui/svelte";
   import { fly } from "svelte/transition";
 

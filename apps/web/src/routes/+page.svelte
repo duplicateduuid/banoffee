@@ -2,7 +2,7 @@
 	import { createQuery } from '@tanstack/svelte-query';
 	import { getRecommendations } from '../requests/user';
 	import { type Resource } from '../schemas/resource';
-	import Card from './Card.svelte';
+	import Card from '../lib/components/Card.svelte';
 
 	const recommendations = createQuery<Resource[]>({
 		queryKey: ['recommendations'],

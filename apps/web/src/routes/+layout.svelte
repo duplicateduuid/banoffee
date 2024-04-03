@@ -2,8 +2,8 @@
 	import { QueryClientProvider } from '@tanstack/svelte-query';
 	import '../app.css';
 	import type { LayoutData } from './$types';
-	import AccountDropdown from './AccountDropdown.svelte';
-	import SignDialog from './SignDialog.svelte';
+	import AccountDropdown from '../lib/components/AccountDropdown.svelte';
+	import SignDialog from '../lib/components/SignDialog.svelte';
 	import { page } from '$app/stores';
 	import classnames from 'classnames';
 
