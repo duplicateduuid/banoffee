@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { RequestError, api } from "../api";
-import { userSchema } from "../schemas/user";
 
 export const signInRequestSchema = z.object({
   login: z.string()
@@ -16,7 +15,7 @@ export type SignInRequestType = z.infer<typeof signInRequestSchema>;
 export const signInRequest = async (payload: SignInRequestType) => {
   try {
     const { data } = await api.post("/login", payload);
-
+    
     const sessionId = z.string().parse(data.sessionId);
     return { sessionId }
   } catch (e) {

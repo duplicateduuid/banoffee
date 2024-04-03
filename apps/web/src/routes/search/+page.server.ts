@@ -1,8 +1,8 @@
 import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { signInRequest, signInRequestSchema, signUpRequest, signUpRequestSchema } from "../requests/auth";
+import { signInRequest, signInRequestSchema, signUpRequest, signUpRequestSchema } from "../../requests/auth";
 import { fail, type Actions } from "@sveltejs/kit";
-import { RequestError } from "../api";
+import { RequestError } from "../../api";
 
 export const actions: Actions = {
   signIn: async ({ request, cookies }) => {
