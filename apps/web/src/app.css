@@ -1,11 +1,11 @@
 @font-face {
-  font-family: 'Satoshi';
-  src: url(/fonts/satoshi.ttf);
+	font-family: 'Satoshi';
+	src: url(/fonts/satoshi.ttf);
 }
 
 @font-face {
-  font-family: 'Cabinet';
-  src: url(/fonts/cabinet.ttf);
+	font-family: 'Cabinet';
+	src: url(/fonts/cabinet.ttf);
 }
 
 @tailwind base;

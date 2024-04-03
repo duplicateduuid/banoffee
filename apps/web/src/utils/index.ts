@@ -13,10 +13,9 @@ export const getCookies = (cookieString: string): Record<string, unknown> => {
 };
 
 export const isValidUrl = (urlString: string) => {
-	try { 
-		return Boolean(new URL(urlString)); 
+	try {
+		return Boolean(new URL(urlString));
+	} catch (e) {
+		return false;
 	}
-	catch(e){ 
-		return false; 
-	}
-}
+};

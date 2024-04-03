@@ -1,54 +1,54 @@
-import { z } from "zod";
-import type { Cookies } from "@sveltejs/kit";
-import { RequestError, api } from "../api";
-import { userSchema } from "../schemas/user";
-import { resourceSchema } from "../schemas/resource";
+import { z } from 'zod';
+import type { Cookies } from '@sveltejs/kit';
+import { RequestError, api } from '../api';
+import { userSchema } from '../schemas/user';
+import { resourceSchema } from '../schemas/resource';
 
 export const me = async (cookies?: Cookies) => {
-  const sessionId = cookies?.get("sessionId");
-  
-  const config = sessionId
-    ? {
-      headers: { Cookie: `sessionId=${sessionId}`}
-    }
-    : undefined;  
+	const sessionId = cookies?.get('sessionId');
 
-  try {
-    const { data } = await api.get("/me", config);
-    return userSchema.passthrough().parse(data.user);
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new RequestError(error);
-    }
+	const config = sessionId
+		? {
+				headers: { Cookie: `sessionId=${sessionId}` }
+			}
+		: undefined;
 
-    throw new RequestError(new Error("unexpected error"));
-  }
-}
+	try {
+		const { data } = await api.get('/me', config);
+		return userSchema.passthrough().parse(data.user);
+	} catch (error) {
+		if (error instanceof Error) {
+			throw new RequestError(error);
+		}
+
+		throw new RequestError(new Error('unexpected error'));
+	}
+};
 
 export const getRecommendations = async () => {
-  try {
-    const { data } = await api.get("/recommendations");
+	try {
+		const { data } = await api.get('/recommendations');
 
-    return z.array(resourceSchema).parse(data.recommendations);
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new RequestError(error);
-    }
+		return z.array(resourceSchema).parse(data.recommendations);
+	} catch (error) {
+		if (error instanceof Error) {
+			throw new RequestError(error);
+		}
 
-    throw new RequestError(new Error("unexpected error"));
-  }
-}
+		throw new RequestError(new Error('unexpected error'));
+	}
+};
 
 export const getPopularThisWeek = async () => {
-  try {
-    const { data } = await api.get("/popular");
+	try {
+		const { data } = await api.get('/popular');
 
-    return z.array(resourceSchema).parse(data.resources);
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new RequestError(error);
-    }
+		return z.array(resourceSchema).parse(data.resources);
+	} catch (error) {
+		if (error instanceof Error) {
+			throw new RequestError(error);
+		}
 
-    throw new RequestError(new Error("unexpected error"));
-  }
-}
+		throw new RequestError(new Error('unexpected error'));
+	}
+};

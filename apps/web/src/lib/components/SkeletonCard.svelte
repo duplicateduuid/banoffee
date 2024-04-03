@@ -4,7 +4,7 @@
 	type Props = {
 		variant?: 'horizontal' | 'vertical';
 	};
-	const { variant = "horizontal" }: Props = $props();
+	const { variant = 'horizontal' }: Props = $props();
 </script>
 
 <div

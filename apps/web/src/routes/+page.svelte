@@ -28,7 +28,12 @@
 
 		{#if !$recommendations.isPending && $recommendations.data}
 			{#each $recommendations.data as recommendation, i}
-				<Card redirect="/resource" name={recommendation.name} description={recommendation.description} author={recommendation.author} />
+				<Card
+					redirect="/resource"
+					name={recommendation.name}
+					description={recommendation.description}
+					author={recommendation.author}
+				/>
 			{/each}
 		{/if}
 	</div>
