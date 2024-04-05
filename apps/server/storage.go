@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -45,13 +44,7 @@ type ResourcePostgresRepository struct {
 	db *sqlx.DB
 }
 
-func NewRepositories() Repositories {
-	db, err := sqlx.Connect("postgres", "user=postgres dbname=banoffee password=5up3r_s3cur3_p4ssw0rd sslmode=disable")
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
+func NewRepositories(db *sqlx.DB) Repositories {
 	userRepo := UserPostgresRepository{db: db}
 	resourceRepo := ResourcePostgresRepository{db: db}
 	// TODO: this is bad. write an actual redis repository
