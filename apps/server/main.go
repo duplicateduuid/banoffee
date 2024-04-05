@@ -17,7 +17,7 @@ func main() {
 	flag.Parse()
 
 	if *runSeeder {
-		seed(db)
+		seed(&repositories)
 	} else {
 		api.Run("localhost:6969")
 	}
