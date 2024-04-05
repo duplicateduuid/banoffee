@@ -2,16 +2,18 @@
 	import classNames from 'classnames';
 
 	type Props = {
+		className?: string;
 		variant?: 'horizontal' | 'vertical';
 	};
-	const { variant = 'horizontal' }: Props = $props();
+	const { className, variant = 'horizontal' }: Props = $props();
 </script>
 
 <div
 	class={classNames(
 		'bg-white p-2 sm:p-4 sm:h-64 rounded-2xl shadow-lg flex flex-col sm:flex-row gap-5 select-none',
 		{ 'flex-row': variant === 'horizontal' },
-		{ 'flex-col': variant === 'vertical' }
+		{ 'flex-col': variant === 'vertical' },
+		className
 	)}
 >
 	<div class="h-52 sm:h-full sm:w-72 rounded-xl bg-gray-200 animate-pulse"></div>

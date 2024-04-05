@@ -52,3 +52,19 @@ export const getPopularThisWeek = async () => {
 		throw new RequestError(new Error('unexpected error'));
 	}
 };
+
+export const getMyResources = async (limit: number, offset: number, status: string) => {
+	try {
+		const { data } = await api.get(
+			`/user/resources?limit=${limit}&offset=${offset}&status=${status}`
+		);
+
+		return z.array(resourceSchema).parse(data.resources);
+	} catch (error) {
+		if (error instanceof Error) {
+			throw new RequestError(error);
+		}
+
+		throw new RequestError(new Error('unexpected error'));
+	}
+};

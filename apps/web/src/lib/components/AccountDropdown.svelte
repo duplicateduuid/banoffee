@@ -3,6 +3,7 @@
 	import { type User } from '../../schemas/user';
 	import { createDropdownMenu, melt } from '@melt-ui/svelte';
 	import { fly } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 
 	type Props = {
 		user: User;
@@ -45,8 +46,9 @@
 				type="button"
 				class="item text-lg text-stone-700 tracking-wide py-1.5 outline-none hover:text-stone-400 focus:text-stone-400 transition duration-75"
 				use:melt={$item}
+				on:click={() => goto('/profile')}
 			>
-				Bookmarks
+				Profile
 			</button>
 			<button
 				type="button"
