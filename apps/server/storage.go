@@ -36,7 +36,6 @@ type ResourceRepository interface {
 	GetResourceById(string) (*Resource, error)
 	GetResourceByUrl(string) (*Resource, error)
 	GetResourceByName(name string) (*Resource, error)
-	GetUserResources(user *User, limit int, offset int) (*[]Resource, error)
 	SearchByName(name string, limit int, offset int) (*[]Resource, error)
 }
 
@@ -70,7 +69,7 @@ func (u UserPostgresRepository) GetUserById(id uuid.UUID) (*User, error) {
 	user := new(User)
 	err := u.db.Get(
 		user,
-		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio
+		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio, u.created_at
 		FROM "user" u WHERE u.id=$1`,
 		id,
 	)
@@ -82,7 +81,7 @@ func (u UserPostgresRepository) GetUserByEmail(email string) (*User, error) {
 	user := new(User)
 	err := u.db.Get(
 		user,
-		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio
+		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio, u.created_at
 		FROM "user" u WHERE u.email=$1`,
 		email,
 	)
@@ -94,7 +93,7 @@ func (u UserPostgresRepository) GetUserByUsernameOrEmail(usernameOrEmail string)
 	user := new(User)
 	err := u.db.Get(
 		user,
-		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio
+		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio, u.created_at
 		 FROM "user" u 
 		 WHERE u.email=$1 OR u.username=$1`,
 		usernameOrEmail,
@@ -157,7 +156,7 @@ func (u UserPostgresRepository) GetUserResources(user *User, limit int, offset i
 		WHERE
 			ur.user_id = $1
 			AND ($4 = '' OR ur.status::text = $4)
-            AND ($5 = '' OR ur.review_rating::text = $5)
+			AND ($5 = '' OR ur.review_rating::text = $5)
 		ORDER BY
 			r.created_at
 		LIMIT
@@ -299,35 +298,6 @@ func (r ResourcePostgresRepository) GetResourceByName(name string) (*Resource, e
 		resource,
 		`SELECT r.id, r.url, r.name, r.image_url, r.author, r.description, r.created_at FROM "resource" r WHERE r.name=$1`,
 		name,
-	)
-
-	return resource, err
-}
-
-func (r ResourcePostgresRepository) GetUserResources(user *User, limit int, offset int) (*[]Resource, error) {
-	resource := new([]Resource)
-
-	err := r.db.Select(
-		resource,
-		`
-		SELECT 
-			r.id, r.url, r.name, r.image_url, r.author, r.description, r.created_at
-		FROM 
-			"resource" r 
-		LEFT JOIN 
-			"user_resource" ur ON ur.resource_id = r.id
-		WHERE
-			ur.user_id = $1
-		ORDER BY
-			r.created_at
-		LIMIT
-			$2
-		OFFSET
-			$3
-		`,
-		user.Id,
-		limit,
-		offset,
 	)
 
 	return resource, err
