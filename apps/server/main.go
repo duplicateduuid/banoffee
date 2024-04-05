@@ -17,15 +17,12 @@ func main() {
 	repositories := NewRepositories(db)
 	api := NewAPI(repositories)
 
+	runSeeder := flag.Bool("seed", false, "run all the seeders")
 	flag.Parse()
-	args := flag.Args()
-	if len(args) >= 1 {
-		switch args[0] {
-		case "seed":
-			seed(db)
-		}
-		return
-	}
 
-	api.Run("localhost:6969")
+	if *runSeeder {
+		seed(db)
+	} else {
+		api.Run("localhost:6969")
+	}
 }
