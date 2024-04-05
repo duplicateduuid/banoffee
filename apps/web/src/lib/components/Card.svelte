@@ -5,7 +5,7 @@
 	import type { Resource } from '../../schemas/resource';
 	import { fade } from 'svelte/transition';
 	import { X } from 'lucide-svelte';
-	import { createQuery } from '@tanstack/svelte-query';
+	import { createQuery, createMutation } from '@tanstack/svelte-query';
 
 	type Props = {
 		redirect: string;
@@ -35,26 +35,32 @@
 		enabled: $open
 	});
 
-	// TODO: handle errors & request loading
-	const handleSaveResource = async (input: { resource: Resource | null; user_holds?: boolean }) => {
-		try {
-			if (input.resource?.id) {
-				await api.post(`/user/resource/${input.resource.id}`, { status: 'bookmarked' });
-				return;
+	const saveMutation = createMutation({
+		mutationKey: ['save', url],
+		mutationFn: async (input: { resource: Resource | null; user_holds?: boolean }) => {
+			try {
+				if (input.resource?.id) {
+					await api.post(`/user/resource/${input.resource.id}`, { status: 'bookmarked' });
+					return;
+				}
+
+				const {
+					data: { resource: newResource }
+				} = await api.post<{ resource: Resource }>('/resource', {
+					url,
+					name
+				});
+
+				await api.post(`/user/resource/${newResource.id}`, { status: 'bookmarked' });
+			} catch (err) {
+				throw new Error(`Unexpected error calling the API: ${JSON.stringify(err)}`);
 			}
+		},
+		onSuccess: () => $resource.refetch()
+	});
 
-			const {
-				data: { resource: newResource }
-			} = await api.post<{ resource: Resource }>('/resource', {
-				url,
-				name
-			});
-
-			await api.post(`/user/resource/${newResource.id}`, { status: 'bookmarked' });
-		} catch (err) {
-			throw new Error(`Unexpected error calling the API: ${JSON.stringify(err)}`);
-		}
-	};
+	const handleSaveResource = (input: { resource: Resource | null; user_holds?: boolean }) =>
+		$saveMutation.mutate(input);
 </script>
 
 <div class={classNames('flex gap-4 h-40 shadow px-8 py-6 rounded-lg bg-white', className)}>
@@ -115,13 +121,16 @@
 				class="w-full h-12 rounded-md border-none bg-[#4e473b] text-[#F7F6F1] text-base inline-block disabled:opacity-50 disabled:cursor-not-allowed"
 				on:click={() => {
 					if ($resource.data) {
-						handleSaveResource($resource.data).then(() => $resource.refetch());
+						handleSaveResource($resource.data);
 					}
 				}}
 				disabled={($resource.isPending && !$resource.data) ||
-					(!$resource.isPending && $resource.data && $resource.data.user_holds)}
+					(!$resource.isPending && $resource.data && $resource.data.user_holds) ||
+					$saveMutation.isPending}
 			>
-				{#if $resource.isPending && !$resource.data}
+				{#if $saveMutation.isPending}
+					Saving...
+				{:else if $resource.isPending && !$resource.data}
 					Loading...
 				{:else if !$resource.isPending && $resource.data && $resource.data.user_holds}
 					Bookmarked
