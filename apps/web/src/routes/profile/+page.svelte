@@ -119,6 +119,7 @@
 			<div class="w-full flex flex-wrap gap-4 mt-4 items-center justify-center">
 				{#each $resourcesQuery.data.pages as resources}
 					{#each resources as resource}
+						<!-- TODO: Profile cards should not have the save button -->
 						<Card
 							redirect="/resource"
 							url={resource.url}
