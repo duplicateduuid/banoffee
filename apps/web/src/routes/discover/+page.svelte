@@ -40,6 +40,7 @@
 			<Card
 				className="w-[50%] flex flex-col gap-4 h-[392px] shadow px-8 py-6 rounded-lg bg-white"
 				redirect="/resource"
+				url={$popularResources.data[0].url}
 				name={$popularResources.data[0].name}
 				description={$popularResources.data[0].description}
 				author={$popularResources.data[0].author}
@@ -49,6 +50,7 @@
 					<Card
 						className="flex flex-col gap-4 h-48 shadow px-8 py-6 rounded-lg bg-white"
 						redirect="/resource"
+						url={resource.url}
 						name={resource.name}
 						description={resource.description}
 						author={resource.author}

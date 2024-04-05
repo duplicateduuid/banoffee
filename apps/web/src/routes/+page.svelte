@@ -30,6 +30,7 @@
 			{#each $recommendations.data as recommendation, i}
 				<Card
 					redirect="/resource"
+					url={recommendation.url}
 					name={recommendation.name}
 					description={recommendation.description}
 					author={recommendation.author}
