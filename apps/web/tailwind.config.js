@@ -16,7 +16,8 @@ export default {
 					800: '#92400e',
 					900: '#78350f',
 					950: '#451a03'
-				}
+				},
+				background: '#F7F6F1'
 			},
 			fontFamily: {
 				primary: ['Cabinet'],

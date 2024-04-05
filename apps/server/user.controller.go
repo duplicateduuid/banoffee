@@ -236,8 +236,10 @@ func (s *API) handleSaveResource() gin.HandlerFunc {
 }
 
 type GetMyResourcesPayload struct {
-	Limit  int `db:"limit" form:"limit"`
-	Offset int `db:"offset" form:"offset"`
+	Limit        int    `db:"limit" form:"limit"`
+	Offset       int    `db:"offset" form:"offset"`
+	Status       string `db:"status" form:"status"`
+	ReviewRating string `db:"review_rating" form:"review_rating"`
 }
 
 func (s *API) handleGetMyResources() gin.HandlerFunc {
@@ -261,7 +263,7 @@ func (s *API) handleGetMyResources() gin.HandlerFunc {
 			req.Limit = 10
 		}
 
-		resources, err := s.repositories.resourceRepository.GetUserResources(user, req.Limit, req.Offset)
+		resources, err := s.repositories.userRepository.GetUserResources(user, req.Limit, req.Offset, req.Status, req.ReviewRating)
 
 		if err != nil {
 			fmt.Printf("[ERROR] [API.GetMyResources] failed to fetch resources: %s", err)

@@ -83,6 +83,7 @@
 	{#if !$resource.isPending && $resource.data}
 		<Card
 			redirect="/resource"
+			url={$resource.data.url}
 			name={$resource.data.name}
 			description={$resource.data.description}
 			author={$resource.data.author}
@@ -95,6 +96,7 @@
 				{#each resources as resource}
 					<Card
 						redirect="/resource"
+						url={resource.url}
 						name={resource.name}
 						description={resource.description}
 						author={resource.author}

@@ -11,7 +11,7 @@
 	const { user } = data;
 </script>
 
-<main class="w-full min-h-screen font-secondary bg-[#F7F6F1] text-[#18171C]">
+<main class="w-full min-h-screen font-secondary bg-background text-[#18171C]">
 	<QueryClientProvider client={data.queryClient}>
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 			<div class="mx-auto max-w-4xl flex flex-col gap-16 lg:max-w-6xl">
