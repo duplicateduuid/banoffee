@@ -2,17 +2,13 @@ package main
 
 import (
 	"flag"
-	"log"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 )
 
 func main() {
-	db, err := sqlx.Connect("postgres", "user=postgres dbname=banoffee password=5up3r_s3cur3_p4ssw0rd sslmode=disable")
-
-	if err != nil {
-		log.Fatalln(err)
-	}
+	db := createDb()
 
 	repositories := NewRepositories(db)
 	api := NewAPI(repositories)
@@ -25,4 +21,15 @@ func main() {
 	} else {
 		api.Run("localhost:6969")
 	}
+}
+
+func createDb() *sqlx.DB {
+	db, err := sqlx.Connect("postgres", "user=postgres dbname=banoffee password=5up3r_s3cur3_p4ssw0rd sslmode=disable")
+
+	if err != nil {
+		msg := fmt.Sprintf("[ERROR] failed to create database: %s", err)
+		panic(msg)
+	}
+
+	return db
 }

@@ -52,5 +52,5 @@ func seedResources(count int, db *sqlx.DB) {
 		}
 	}
 
-	fmt.Printf("[INFO] [Seeder.resources] Resources created: %s", count)
+	fmt.Printf("[INFO] [Seeder.resources] Resources created: %d", count)
 }
