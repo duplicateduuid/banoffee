@@ -19,3 +19,9 @@ export const isValidUrl = (urlString: string) => {
 		return false;
 	}
 };
+
+export const removeQueryParams = (url: string): string => {
+	const urlObject = new URL(url);
+	urlObject.search = '';
+	return urlObject.toString();
+};

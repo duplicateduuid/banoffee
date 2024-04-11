@@ -11,6 +11,7 @@
 	import classNames from 'classnames';
 	import { getResourceByURL } from '../../requests/resource';
 	import { api } from '../../api';
+	import { removeQueryParams } from '../../utils';
 
 	type Props = {
 		user: User;
@@ -53,17 +54,23 @@
 			getResourceByURL(values.url)
 				.then(async (resource) => {
 					await api.post(`/user/resource/${resource.id}`, { status: 'bookmarked' });
+					dialogOpen.set(false);
 				})
 				.catch(async () => {
+					const title = await fetch(`/api/getTitleFromURL?url=${removeQueryParams(values.url)}`)
+						.then((res) => res.text())
+						.catch(() => null);
+
 					const {
 						data: { resource: newResource }
 					} = await api.post<{ resource: Resource }>('/resource', {
 						url: values.url,
-						// TODO: get name from page title here
-						name: values.url
+						// TODO: Define a better fallback to missing title
+						name: title || values.url
 					});
 
 					await api.post(`/user/resource/${newResource.id}`, { status: 'bookmarked' });
+					dialogOpen.set(false);
 				})
 	});
 </script>
