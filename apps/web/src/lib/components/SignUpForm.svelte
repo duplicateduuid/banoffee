@@ -119,7 +119,7 @@
 					bind:value={$form.username}
 					{...$constraints.username}
 					class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
-            outline-0 transition border-solid border {$errors.username
+            outline-none transition border-solid border {$errors.username
 						? 'border-rose-500'
 						: 'focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'}"
 				/>
@@ -140,7 +140,7 @@
 					bind:value={$form.email}
 					{...$constraints.email}
 					class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
-            outline-0 transition border-solid border {$errors.email
+            outline-none transition border-solid border {$errors.email
 						? 'border-rose-500'
 						: 'focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'}"
 				/>
@@ -162,7 +162,7 @@
 					bind:value={$form.password}
 					{...$constraints.password}
 					class="px-3 py-2 w-full items-center justify-center rounded-lg text-black
-            outline-0 transition border-solid border {$errors.password
+            outline-none transition border-solid border {$errors.password
 						? 'border-rose-500'
 						: 'focus:border-primary-300 hover:ring-2 focus:ring-2 ring-primary-100 ring-0'}"
 				/>

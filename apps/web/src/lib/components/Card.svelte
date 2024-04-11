@@ -65,8 +65,8 @@
 
 <div class={classNames('flex gap-4 h-40 shadow px-8 py-6 rounded-lg bg-white', className)}>
 	<span class="bg-primary-400 h-full aspect-video rounded-lg" />
-	<div class="flex flex-col justify-between h-full">
-		<div class="flex flex-col">
+	<div class="w-full flex flex-col justify-between h-full">
+		<div class="w-full flex flex-col">
 			<p class="font-primary text-2xl tracking-wider font-semibold line-clamp-1">
 				{name}
 			</p>
@@ -74,7 +74,7 @@
 				<p class="text-sm line-clamp-2">{description}</p>
 			{/if}
 		</div>
-		<div class={classNames('flex justify-end', author && 'justify-between')}>
+		<div class={classNames('w-full flex justify-end', author && 'justify-between')}>
 			{#if author}
 				<p>{author}</p>
 			{/if}
