@@ -84,12 +84,19 @@
 				on:click={(e) => {
 					e.stopPropagation();
 					$resource.refetch();
-				}}>Save</button
+				}}
 			>
+				{#if $resource.data?.user_holds}
+					Update
+				{:else}
+					Save
+				{/if}
+			</button>
 		</div>
 	</div>
 </div>
 
+<!-- TODO: Already saved resource variant (update) -->
 <div class="" use:melt={$portalled}>
 	{#if $open}
 		<div
