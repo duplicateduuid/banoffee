@@ -18,6 +18,9 @@
           python
           requests
         ];
+        shellHook = ''
+          zsh
+        '';
       };
   });
 }
