@@ -52,7 +52,7 @@ jobs:
         run: cd apps/server && go get .
       
       - name: Install Resources Recommender dependencies
-        run: cd apps/resources-recommender && source bin/activate && pip3 install .
+        run: cd apps/resources-recommender && pip3 install .
 
   linter:
     name: Run linter checks
@@ -127,7 +127,7 @@ jobs:
         run: cd apps/server && go build
       
       - name: Run Resources Recommender build
-        run: cd apps/resources-recommender && source bin/activate && mypy main.py
+        run: cd apps/resources-recommender && mypy main.py
 
   # TODO: Needs to setup a local postgres to run this
   # tests:
