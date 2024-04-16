@@ -52,7 +52,7 @@ jobs:
         run: cd apps/server && go get .
       
       - name: Install Resources Recommender dependencies
-        run: cd apps/resources-recommender && pip3 install .
+        run: cd apps/resources-recommender && ./bin/pip3 install .
 
   linter:
     name: Run linter checks
