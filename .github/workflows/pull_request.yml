@@ -1,0 +1,154 @@
+name: Pull Request CI
+
+on: [pull_request]
+
+jobs:
+  install:
+    name: Installing Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: "21.7.1"
+      
+      - name: Setup GO Environment
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.22.1"
+
+      - name: Setup golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: v1.57.2
+
+      - name: Setup Python Environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11.8" 
+      
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Cache Go dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
+      
+      - name: Install Extension/Web dependencies
+        run: yarn install
+      
+      - name: Install Server dependencies
+        run: cd apps/server && go get .
+      
+      - name: Install Resources Recommender dependencies
+        run: cd apps/resources-recommender && source bin/activate && pip3 install .
+
+  linter:
+    name: Run linter checks
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Restore node_modules
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Restore Go dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
+  
+      - name: Restore Python dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
+      
+      - name: Run Extension/Web linter checks
+        run: cd apps/web && yarn lint
+      
+      - name: Run Server linter checks
+        run: cd apps/server && golangci-lint run
+  
+  build:
+    name: Run Builds
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Restore node_modules
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+  
+      - name: Restore Go dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
+    
+      - name: Restore Python dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
+
+      - name: Run Web build
+        run: cd apps/web && yarn build
+      
+      - name: Run Extension build
+        run: cd apps/extension/web-extension && yarn build
+      
+      - name: Run Server build
+        run: cd apps/server && go build
+      
+      - name: Run Resources Recommender build
+        run: cd apps/resources-recommender && source bin/activate && mypy main.py
+
+  # TODO: Needs to setup a local postgres to run this
+  # tests:
+  #   name: Run Tests
+  #   runs-on: ubuntu-latest
+  #   needs: install
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 2
+
+  #     - name: Restore Go dependencies
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: ~/go/pkg/mod
+  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
+        
+  #     - name: Run Server tests
+  #       run: cd apps/server && go test
