@@ -2,6 +2,7 @@ name: Pull Request CI
 
 on: [pull_request]
 
+# TODO: cache dependencies with Nix
 jobs:
   install:
     name: Installing Packages
@@ -12,47 +13,17 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Setup Node Environment
-        uses: actions/setup-node@v3
-        with:
-          node-version: "21.7.1"
-      
-      - name: Setup GO Environment
-        uses: actions/setup-go@v2
-        with:
-          go-version: "1.22.1"
-
-      - name: Setup Python Environment
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.11.8" 
-      
-      - name: Cache node_modules
-        uses: actions/cache@v2
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Cache Go dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
-
-      - name: Cache Python dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
       
       - name: Install Extension/Web dependencies
-        run: yarn install
+        run: nix develop && yarn install
       
       - name: Install Server dependencies
-        run: cd apps/server && go get .
+        run: nix develop && cd apps/server && go get .
       
       - name: Install Resources Recommender dependencies
-        run: cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
+        run: nix develop && cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
 
   linter:
     name: Run linter checks
@@ -64,30 +35,20 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Restore node_modules
-        uses: actions/cache@v2
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-
-      - name: Restore Go dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
-  
-      - name: Restore Python dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
+      - name: Install Extension/Web dependencies
+        run: nix develop && yarn install
+        
+      - name: Install Server dependencies
+        run: nix develop && cd apps/server && go get .
+        
+      # - name: Install Resources Recommender dependencies
+      #   run: nix develop && cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
       
       - name: Run Extension/Web linter checks
-        run: cd apps/web && yarn lint
+        run: nix develop && cd apps/web && yarn lint
       
-      # TODO: install golangci-lint
-      # - name: Run Server linter checks
-      #   run: cd apps/server && golangci-lint run
+      - name: Run Server linter checks
+        run: nix develop && cd apps/server && golangci-lint run
   
   build:
     name: Run Builds
@@ -99,35 +60,26 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Restore node_modules
-        uses: actions/cache@v2
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-  
-      - name: Restore Go dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
-    
-      - name: Restore Python dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ hashFiles('**/requirements.txt') }}
+      - name: Install Extension/Web dependencies
+        run: nix develop && yarn install
+          
+      - name: Install Server dependencies
+        run: nix develop && cd apps/server && go get .
+          
+      - name: Install Resources Recommender dependencies
+        run: nix develop && cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
 
       - name: Run Web build
-        run: cd apps/web && yarn build
+        run: nix develop && cd apps/web && yarn build
       
       - name: Run Extension build
-        run: cd apps/extension/web-extension && yarn build
+        run: nix develop && cd apps/extension/web-extension && yarn build
       
       - name: Run Server build
-        run: cd apps/server && go build
+        run: nix develop && cd apps/server && go build
       
       - name: Run Resources Recommender build
-        run: cd apps/resources-recommender && python3 -m venv . && source bin/activate && mypy main.py
+        run: nix develop && cd apps/resources-recommender && python3 -m venv . && source bin/activate && mypy main.py
 
   # TODO: Needs to setup a local postgres to run this
   # tests:
@@ -140,11 +92,8 @@ jobs:
   #       with:
   #         fetch-depth: 2
 
-  #     - name: Restore Go dependencies
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: ~/go/pkg/mod
-  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
+  #     - name: Install Server dependencies
+  #       run: nix develop && cd apps/server && go get .
         
   #     - name: Run Server tests
-  #       run: cd apps/server && go test
+  #       run: nix develop && cd apps/server && go test
