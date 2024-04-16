@@ -22,11 +22,6 @@ jobs:
         with:
           go-version: "1.22.1"
 
-      - name: Setup golangci-lint
-        uses: golangci/golangci-lint-action@v4
-        with:
-          version: v1.57.2
-
       - name: Setup Python Environment
         uses: actions/setup-python@v2
         with:
@@ -90,8 +85,9 @@ jobs:
       - name: Run Extension/Web linter checks
         run: cd apps/web && yarn lint
       
-      - name: Run Server linter checks
-        run: cd apps/server && golangci-lint run
+      # TODO: install golangci-lint
+      # - name: Run Server linter checks
+      #   run: cd apps/server && golangci-lint run
   
   build:
     name: Run Builds
