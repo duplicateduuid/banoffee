@@ -87,7 +87,7 @@ jobs:
           cd apps/server && go build
           cd ../web && yarn build
           cd ../extension/web-extension && yarn build
-          cd ../resources-recommender && python3 -m venv . && source bin/activate && mypy main.py
+          cd ../../resources-recommender && python3 -m venv . && source bin/activate && mypy main.py
 
   # TODO: Needs to setup a local postgres to run this
   # tests:
