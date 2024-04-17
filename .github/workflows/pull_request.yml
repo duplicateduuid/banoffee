@@ -2,7 +2,7 @@ name: Pull Request CI
 
 on: [pull_request]
 
-# TODO: cache dependencies with Nix
+# TODO: cache dependencies instead of having to reinstall again on every job
 jobs:
   install:
     name: Installing Packages
@@ -18,17 +18,15 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Install Extension/Web dependencies
-        run: nix develop && yarn install
-      
-      - name: Install Server dependencies
-        run: nix develop && cd apps/server && go get .
-      
-      - name: Install Resources Recommender dependencies
-        run: nix develop && cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
+      - name: Install Dependencies
+        run: |
+          nix develop
+          cd apps/server && go get .
+          cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
+          cd apps/web && yarn install
 
   linter:
-    name: Run linter checks
+    name: Run Linter Checks
     runs-on: ubuntu-latest
     needs: install
     steps:
@@ -37,21 +35,24 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Install Extension/Web dependencies
-        run: nix develop && yarn install
+      - name: Install Nix
+        uses: duplicateduuid/install-nix-action@8887e596b4ee1134dae06b98d573bd674693f47c
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
         
-      - name: Install Server dependencies
-        run: nix develop && cd apps/server && go get .
-        
-      # - name: Install Resources Recommender dependencies
-      #   run: nix develop && cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
-      
-      - name: Run Extension/Web linter checks
-        run: nix develop && cd apps/web && yarn lint
-      
-      - name: Run Server linter checks
-        run: nix develop && cd apps/server && golangci-lint run
-  
+      - name: Install Dependencies
+        run: |
+          nix develop
+          cd apps/server && go get .
+          cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
+          cd apps/web && yarn install
+
+      - name: Run Linters
+        run: |
+          nix develop
+          cd apps/server && golangci-lint run
+          cd apps/web && yarn lint
+
   build:
     name: Run Builds
     runs-on: ubuntu-latest
@@ -62,40 +63,38 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Install Extension/Web dependencies
-        run: nix develop && yarn install
+      - name: Install Nix
+        uses: duplicateduuid/install-nix-action@8887e596b4ee1134dae06b98d573bd674693f47c
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Install Server dependencies
-        run: nix develop && cd apps/server && go get .
-          
-      - name: Install Resources Recommender dependencies
-        run: nix develop && cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
+      - name: Install Dependencies
+        run: |
+          nix develop
+          cd apps/server && go get .
+          cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
+          cd apps/web && yarn install
 
-      - name: Run Web build
-        run: nix develop && cd apps/web && yarn build
-      
-      - name: Run Extension build
-        run: nix develop && cd apps/extension/web-extension && yarn build
-      
-      - name: Run Server build
-        run: nix develop && cd apps/server && go build
-      
-      - name: Run Resources Recommender build
-        run: nix develop && cd apps/resources-recommender && python3 -m venv . && source bin/activate && mypy main.py
+      - name: Run Builds
+        run: |
+          nix develop
+          cd apps/server && go build
+          cd apps/web && yarn build
+          cd apps/extension/web-extension && yarn build
+          cd apps/resources-recommender && python3 -m venv . && source bin/activate && mypy main.py
 
   # TODO: Needs to setup a local postgres to run this
   # tests:
-  #   name: Run Tests
-  #   runs-on: ubuntu-latest
-  #   needs: install
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 2
-
-  #     - name: Install Server dependencies
-  #       run: nix develop && cd apps/server && go get .
-        
-  #     - name: Run Server tests
-  #       run: nix develop && cd apps/server && go test
+  #     name: Run Tests
+  #     runs-on: ubuntu-latest
+  #     needs: install
+  #     steps:
+  #       - name: Checkout
+  #         uses: actions/checkout@v3
+  #         with:
+  #           fetch-depth: 2
+  #
+  #       - name: Run Tests
+  #         run: |
+  #           nix develop
+  #           cd apps/server && go test
