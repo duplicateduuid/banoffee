@@ -22,8 +22,8 @@ jobs:
         run: |
           nix develop
           cd apps/server && go get .
-          cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
-          cd apps/web && yarn install
+          cd ../resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
+          cd ../../ && yarn install
 
   linter:
     name: Run Linter Checks
@@ -44,14 +44,14 @@ jobs:
         run: |
           nix develop
           cd apps/server && go get .
-          cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
-          cd apps/web && yarn install
+          cd ../resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
+          cd ../../ && yarn install
 
       - name: Run Linters
         run: |
           nix develop
           cd apps/server && golangci-lint run
-          cd apps/web && yarn lint
+          cd ../web && yarn lint
 
   build:
     name: Run Builds
@@ -72,16 +72,16 @@ jobs:
         run: |
           nix develop
           cd apps/server && go get .
-          cd apps/resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
-          cd apps/web && yarn install
+          cd ../resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
+          cd ../../ && yarn install
 
       - name: Run Builds
         run: |
           nix develop
           cd apps/server && go build
-          cd apps/web && yarn build
-          cd apps/extension/web-extension && yarn build
-          cd apps/resources-recommender && python3 -m venv . && source bin/activate && mypy main.py
+          cd ../web && yarn build
+          cd ../extension/web-extension && yarn build
+          cd ../resources-recommender && python3 -m venv . && source bin/activate && mypy main.py
 
   # TODO: Needs to setup a local postgres to run this
   # tests:
