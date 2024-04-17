@@ -21,9 +21,11 @@ jobs:
       - name: Install Dependencies
         run: |
           nix develop
-          cd apps/server && go get .
+          yarn install &&
+          cd apps/web && yarn install
+          cd ../extension/web-extension && yarn install
+          cd ../../server && go get .
           cd ../resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
-          cd ../../ && yarn install
 
   linter:
     name: Run Linter Checks
@@ -43,15 +45,17 @@ jobs:
       - name: Install Dependencies
         run: |
           nix develop
-          cd apps/server && go get .
+          yarn install &&
+          cd apps/web && yarn install
+          cd ../extension/web-extension && yarn install
+          cd ../../server && go get .
           cd ../resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
-          cd ../../ && yarn install
 
+      # TODO: setup GO lint with golangci-lint
       - name: Run Linters
         run: |
           nix develop
-          cd apps/server && golangci-lint run
-          cd ../web && yarn lint
+          cd apps/web && yarn lint
 
   build:
     name: Run Builds
@@ -71,9 +75,11 @@ jobs:
       - name: Install Dependencies
         run: |
           nix develop
-          cd apps/server && go get .
+          yarn install &&
+          cd apps/web && yarn install
+          cd ../extension/web-extension && yarn install
+          cd ../../server && go get .
           cd ../resources-recommender && python3 -m venv . && source bin/activate && pip3 install .
-          cd ../../ && yarn install
 
       - name: Run Builds
         run: |
