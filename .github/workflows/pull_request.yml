@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 2
 
       - name: Install Nix
-        uses: duplicateduuid/install-nix-action@v25
+        uses: duplicateduuid/install-nix-action@8887e596b4ee1134dae06b98d573bd674693f47c
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       
