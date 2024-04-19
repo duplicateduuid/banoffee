@@ -311,7 +311,7 @@ func (s *API) handleGetMyResource() gin.HandlerFunc {
 			return
 		}
 
-		_, err = s.repositories.userRepository.GetUserResource(user, resource.Id.String())
+		resource, err = s.repositories.userRepository.GetUserResource(user, resource.Id.String())
 
 		if err != nil {
 			ctx.JSON(200, gin.H{"resource": resource, "user_holds": false})

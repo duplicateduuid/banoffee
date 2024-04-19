@@ -10,7 +10,7 @@
 	import Spinner from '$lib/components/Spinner.svelte';
 	import SkeletonCard from '$lib/components/SkeletonCard.svelte';
 
-	let status = $state<'completed' | 'on-going' | 'bookmarked'>('completed');
+	let status = $state<'completed' | 'ongoing' | 'bookmarked'>('completed');
 
 	const resourcesQuery = createInfiniteQuery<Resource[]>({
 		queryKey: ['get-my-resources'],
@@ -84,12 +84,12 @@
 			<button
 				class="relative flex flex-col items-center outline-none border-none cursor-pointer"
 				on:click={() => {
-					status = 'on-going';
+					status = 'ongoing';
 					$resourcesQuery.refetch();
 				}}
 			>
 				<p class="text-md font-primary font-semibold">On-going</p>
-				{#if status === 'on-going'}
+				{#if status === 'ongoing'}
 					<span class="bg-primary-400 h-1 absolute mt-1 top-full w-[60%] rounded-full" />
 				{/if}
 			</button>
