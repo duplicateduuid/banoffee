@@ -16,7 +16,11 @@
         nativeBuildInputs = with pkgs; [ nix git nodejs yarn go golangci-lint gopls zsh docker docker-compose sqlx-cli ];
         buildInputs = with pkgs.python3Packages; [
           python
+          pip
           requests
+          setuptools
+          numpy
+          wheel
         ];
         shellHook = ''
           zsh

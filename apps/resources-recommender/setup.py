@@ -11,6 +11,6 @@ setup(
         'scikit-surprise',
         'psycopg2-binary',
         'types-psycopg2',
-        "mypy"
+        'mypy'
     ],
 )
