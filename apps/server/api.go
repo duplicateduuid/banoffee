@@ -37,12 +37,12 @@ func (a *API) SetupRouter() *gin.Engine {
 
 	router.Use(CorsMiddleware())
 
-	authRouter := router.Group("/").Use(a.AuthMiddleware())
-
 	router.GET("/health-check", func(ctx *gin.Context) { ctx.JSON(200, gin.H{"message": "Banoffee"}) })
 	router.POST("/login", a.handleLogin())
 	router.POST("/register", a.hanlderRegister())
 	router.GET("/popular", a.handleGetPopularThisWeek())
+
+	authRouter := router.Group("/").Use(a.AuthMiddleware())
 
 	authRouter.GET("/me", a.handleMe())
 	authRouter.GET("/resource", a.handleGetResource())

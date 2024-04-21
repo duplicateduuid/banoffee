@@ -355,10 +355,10 @@ func (s *API) handleGetPopularThisWeek() gin.HandlerFunc {
 		offset := 1
 
 		for offset <= 4 {
-			resources, err := s.repositories.userRepository.GetPopularThisWeekResources(offset)
+			resources, err := s.repositories.resourceRepository.GetPopularThisWeekResources(offset)
 
 			if err != nil {
-				fmt.Printf("[ERROR] [API.GetPopularThisWeek] failed to fetch resources: %s", err)
+				fmt.Printf("[ERROR] [API.GetPopularThisWeek] failed to fetch resources: %s\n", err)
 				break
 			}
 
@@ -370,6 +370,8 @@ func (s *API) handleGetPopularThisWeek() gin.HandlerFunc {
 			results = resources
 			break
 		}
+
+		fmt.Printf("[INFO] [API.GetPopularThisWeek] resources: %v\n", results)
 
 		if len(*results) <= 0 {
 			ctx.JSON(200, gin.H{"resources": []*Resource{}})

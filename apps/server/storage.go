@@ -24,7 +24,6 @@ type UserRepository interface {
 	GetUserResources(user *User, limit int, offset int, status string, reviewRating string) (*[]Resource, error)
 	CreateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
 	UpdateUserResource(user *User, resourceId string, status *string, reviewRating *string, reviewComment *string) error
-	GetPopularThisWeekResources(offset int) (*[]Resource, error)
 }
 
 type UserPostgresRepository struct {
@@ -37,6 +36,7 @@ type ResourceRepository interface {
 	GetResourceByUrl(string) (*Resource, error)
 	GetResourceByName(name string) (*Resource, error)
 	SearchByName(name string, limit int, offset int) (*[]Resource, error)
+	GetPopularThisWeekResources(offset int) (*[]Resource, error)
 }
 
 type ResourcePostgresRepository struct {
@@ -222,33 +222,6 @@ func (u UserPostgresRepository) UpdateUserResource(user *User, resourceId string
 	return err
 }
 
-func (u UserPostgresRepository) GetPopularThisWeekResources(offset int) (*[]Resource, error) {
-	resource := new([]Resource)
-	include_days := offset * 6
-
-	err := u.db.Select(
-		resource,
-		`
-		SELECT 
-			r.id, r.url, r.name, r.image_url, r.author, r.description, ur.status, ur.review_rating, ur.review_comment, r.created_at
-		FROM 
-			"user_resource" ur 
-		LEFT JOIN 
-			"resource" r ON r.id = ur.resource_id
-		WHERE
-			ur.review_rating IN ('one', 'two', 'three', 'four', 'five')
-			AND ur.created_at >= CURRENT_DATE - ($1 || 'DAYS')::INTERVAL -- Include today's date
-    		AND ur.created_at < CURRENT_DATE + INTERVAL '1 day' -- Up to the end of today
-		ORDER BY
-			ur.review_rating DESC
-		LIMIT 5
-		`,
-		include_days,
-	)
-
-	return resource, err
-}
-
 func (r ResourcePostgresRepository) CreateResource(resource *Resource) (*Resource, error) {
 	_, err := r.db.Exec(
 		`INSERT INTO "resource" (url, name, image_url, author, description)
@@ -329,4 +302,31 @@ func (r ResourcePostgresRepository) SearchByName(name string, limit int, offset 
 	fmt.Printf("[INFO] [ResourcePostgresRepository.SearchByName] selected: %v\n", resources)
 
 	return resources, err
+}
+
+func (u ResourcePostgresRepository) GetPopularThisWeekResources(offset int) (*[]Resource, error) {
+	resource := new([]Resource)
+	include_days := offset * 6
+
+	err := u.db.Select(
+		resource,
+		`
+		SELECT 
+			r.id, r.url, r.name, r.image_url, r.author, r.description, ur.status, ur.review_rating, ur.review_comment, r.created_at
+		FROM 
+			"user_resource" ur 
+		LEFT JOIN 
+			"resource" r ON r.id = ur.resource_id
+		WHERE
+			ur.review_rating IN ('one', 'two', 'three', 'four', 'five')
+			AND ur.created_at >= CURRENT_DATE - ($1 || 'DAYS')::INTERVAL -- Include today's date
+    		AND ur.created_at < CURRENT_DATE + INTERVAL '1 day' -- Up to the end of today
+		ORDER BY
+			ur.review_rating DESC
+		LIMIT 5
+		`,
+		include_days,
+	)
+
+	return resource, err
 }
