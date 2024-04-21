@@ -13,7 +13,7 @@
     in {
       devShell = pkgs.mkShell { 
         NIX_CONFIG = "experimental-features = nix-command flakes";
-        nativeBuildInputs = with pkgs; [ nix git nodejs yarn go golangci-lint gopls zsh docker docker-compose sqlx-cli ];
+        nativeBuildInputs = with pkgs; [ nix git nodejs yarn go golangci-lint gopls zsh docker docker-compose sqlx-cli zlib zlib-ng libgcc ];
         buildInputs = with pkgs.python3Packages; [
           python
           pip
@@ -21,6 +21,8 @@
           setuptools
           numpy
           wheel
+          pandas
+          psycopg2
         ];
         shellHook = ''
           zsh

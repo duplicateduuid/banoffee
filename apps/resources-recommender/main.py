@@ -156,6 +156,22 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         self.url_to_id = url_to_id
         super().__init__(*args, **kwargs)
 
+    def do_POST(self):
+        try:
+            train_knn(self.algo, self.pool)
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            response_json = json.dumps({ 'message': 'algo updated with success!' })
+            self.wfile.write(response_json.encode('utf-8'))
+        except:
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            response_json = json.dumps({ 'message': 'failed to update algo!' })
+            self.wfile.write(response_json.encode('utf-8'))
+
     # TODO: do some sort of pagination with offset here
     def do_GET(self):
         parsed_url = urlparse(self.path)
