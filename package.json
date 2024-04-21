@@ -10,7 +10,8 @@
     "dev:server": "cd apps/server && go run .",
     "dev:recommender": "cd apps/resources-recommender && ./bin/mypy main.py && ./bin/python3 main.py",
     "build:web-extension": "cd apps/extension/web-extension && yarn build",
-    "install:recommender": "cd apps/resources-recommender && ./bin/pip3 install ."
+    "install:recommender": "cd apps/resources-recommender && ./bin/pip3 install .",
+    "dev:seed": "cd apps/server && go run . --seed"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",

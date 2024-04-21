@@ -20,11 +20,8 @@ func seedUsers(r *Repositories, count int) []User {
 		log.Fatalln(err)
 	}
 
-	user, err = r.userRepository.CreateUser(user)
+	user, _ = r.userRepository.CreateUser(user)
 
-	if err != nil {
-		log.Fatalln(err)
-	}
 	fmt.Printf("[INFO] [Seeder.resources] Default user created %v\n", user)
 
 	users := []User{}
@@ -71,13 +68,27 @@ func seedResources(r *Repositories, count int) []Resource {
 }
 
 func seedUserResources(r *Repositories, users []User, resources []Resource) {
-
 	for userIndex := range users {
 		for resourceIndex := range resources {
 			user := users[userIndex]
 			resource := resources[resourceIndex]
 
-			err := r.userRepository.CreateUserResource(&user, resource.Id.String(), nil, nil, nil)
+			var status *string
+
+			if resourceIndex < 1*(len(resources)/4) {
+				status = new(string)
+				*status = "ongoing"
+			} else if resourceIndex < 2*(len(resources)/4) {
+				status = new(string)
+				*status = "completed"
+			} else if resourceIndex < 3*(len(resources)/4) {
+				status = new(string)
+				*status = "bookmarked"
+			} else {
+				continue
+			}
+
+			err := r.userRepository.CreateUserResource(&user, resource.Id.String(), status, nil, nil)
 
 			if err != nil {
 				fmt.Printf("[ERROR] [Seeder.resources] Failed to link user(id=%s) with resource(id=%s): %s\n", user.Id, resource.Id, err)
