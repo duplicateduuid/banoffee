@@ -20,7 +20,7 @@ export const actions: Actions = {
 		try {
 			const { sessionId } = await signInRequest(form.data);
 			// TODO: setting cookies manually? this doesn't seems right.
-			cookies.set('sessionId', sessionId, { path: '/' });
+			cookies.set('sessionId', sessionId, { path: '/', httpOnly: false });
 
 			return { form };
 		} catch (error) {
@@ -50,7 +50,7 @@ export const actions: Actions = {
 		try {
 			const { sessionId } = await signUpRequest(form.data);
 			// TODO: same here
-			cookies.set('sessionId', sessionId, { path: '/' });
+			cookies.set('sessionId', sessionId, { path: '/', httpOnly: false });
 
 			return { form };
 		} catch (error) {
