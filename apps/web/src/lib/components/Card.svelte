@@ -122,9 +122,9 @@
 	};
 </script>
 
-<div class={classNames('flex gap-4 h-40 shadow px-8 py-6 rounded-lg bg-white', className)}>
+<div class={classNames('flex gap-2 h-40 shadow px-8 py-6 rounded-lg bg-white', className)}>
 	<span class="bg-primary-400 h-full aspect-video rounded-lg" />
-	<div class="w-full flex flex-col justify-between h-full">
+	<div class="w-full flex flex-col justify-between h-full gap-4">
 		<div class="w-full flex flex-col">
 			<p class="font-primary text-2xl tracking-wider font-semibold line-clamp-1">
 				{name}
@@ -133,9 +133,9 @@
 				<p class="text-sm line-clamp-2">{description}</p>
 			{/if}
 		</div>
-		<div class={classNames('w-full flex justify-end', author && 'justify-between')}>
+		<div class={classNames('w-full flex justify-end gap-2', author && 'justify-between')}>
 			{#if author}
-				<p>{author}</p>
+				<p class="line-clamp-1">{author}</p>
 			{/if}
 
 			<button
@@ -164,7 +164,7 @@
 			transition:fade={{ duration: 150 }}
 		/>
 		<div
-			class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 min-w-[30em] max-w-xl rounded-xl flex flex-col justify-between gap-6 p-8 font-secondary bg-white shadow-xl"
+			class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 min-w-[90%] sm:min-w-[30em] max-w-[90%] lg:max-w-xl rounded-xl flex flex-col justify-between gap-6 p-8 font-secondary bg-white shadow-xl"
 			use:melt={$content}
 		>
 			<button
@@ -184,7 +184,7 @@
 			{#if !$resource.isPending && !$resource.data}
 				<p>Loading...</p>
 			{:else if $resource.data && $resource.data.user_holds}
-				<div class="flex items-center gap-4">
+				<div class="flex flex-col sm:flex-row sm:items-center gap-4">
 					<button
 						class="flex items-center gap-2 cursor-pointer"
 						on:click={() => {

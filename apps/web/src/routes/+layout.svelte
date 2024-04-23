@@ -6,6 +6,7 @@
 	import SignDialog from '../lib/components/SignDialog.svelte';
 	import { page } from '$app/stores';
 	import classnames from 'classnames';
+	import { goto } from '$app/navigation';
 
 	export let data: LayoutData;
 	const { user } = data;
@@ -16,9 +17,9 @@
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 			<div class="mx-auto max-w-4xl flex flex-col gap-16 lg:max-w-6xl">
 				<!-- TODO: create a header component -->
-				<header class="grid grid-cols-4 w-full justify-between py-8 items-center">
-					<span class="font-primary font-bold text-5xl">Banoffee</span>
-					<div class="col-span-2 w-full flex items-center justify-center gap-10">
+				<header class="flex sm:grid sm:grid-cols-4 w-full justify-between py-8 items-center">
+					<button class="font-primary font-bold text-5xl" on:click={() => goto('/')}>Banoffee</button>
+					<div class="col-span-2 w-full items-center justify-center gap-10 hidden sm:flex">
 						<div class="relative flex flex-col items-center">
 							<a
 								href="/"

@@ -109,6 +109,14 @@
 				type="button"
 				class="item text-lg text-stone-700 tracking-wide py-1.5 outline-none hover:text-stone-400 focus:text-stone-400 transition duration-75"
 				use:melt={$item}
+				on:click={() => goto('/discover')}
+			>
+				Discover
+			</button>
+			<button
+				type="button"
+				class="item text-lg text-stone-700 tracking-wide py-1.5 outline-none hover:text-stone-400 focus:text-stone-400 transition duration-75"
+				use:melt={$item}
 			>
 				Settings
 			</button>
@@ -141,7 +149,7 @@
 			transition:fade={{ duration: 150 }}
 		/>
 		<form
-			class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 min-w-[30em] rounded-xl flex flex-col justify-between gap-4 p-8 font-secondary bg-white shadow-xl"
+			class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 min-w-[90%] sm:min-w-[30em] rounded-xl flex flex-col justify-between gap-4 p-8 font-secondary bg-white shadow-xl"
 			use:melt={$dialogContent}
 			use:form
 		>

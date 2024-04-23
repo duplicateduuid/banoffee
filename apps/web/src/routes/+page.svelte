@@ -18,7 +18,7 @@
 </svelte:head>
 
 <section class="flex flex-col gap-8">
-	<h1 class="font-primary font-bold text-6xl max-w-[50%] tracking-wider">You might like</h1>
+	<h1 class="font-primary font-bold text-4xl w-full sm:text-6xl sm:max-w-[50%] tracking-wider">You might like</h1>
 	<div class="flex flex-col gap-4">
 		{#if $recommendations.isPending && !$recommendations.data}
 			{#each { length: 4 } as _}
