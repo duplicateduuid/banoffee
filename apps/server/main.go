@@ -3,11 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("Error loading .env file:", err)
+	}
+
 	db := createDb()
 
 	repositories := NewRepositories(db)
