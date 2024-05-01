@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -249,8 +250,29 @@ func (s *API) handleGoogleOAuthExchange() gin.HandlerFunc {
 			return
 		}
 
-		// TODO: register user with email if not exist/get user from db and set user session
-		ctx.JSON(http.StatusOK, gin.H{"email": userData["email"].(string)})
+		userEmail := userData["email"].(string)
+		user, err := s.repositories.userRepository.GetUserByEmail(userEmail)
+
+		if user == nil || err != nil {
+			user, err = s.repositories.userRepository.CreateOAuthUser(userEmail, strings.Split(userEmail, "@")[0])
+			if err != nil {
+				fmt.Printf("[ERROR] [UserController.handleGoogleOAuthExchange] failed to store user: %s\n", err)
+				ctx.JSON(400, gin.H{"error": "Cannot create user"})
+				return
+			}
+		}
+
+		sessionId := uuid.New().String()
+
+		err = s.repositories.redis.Set(ctx, sessionId, user.Id.String(), 0).Err()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to set session id"})
+			return
+		}
+
+		ctx.SetCookie("sessionId", sessionId, 3600*24, "/", "localhost", false, false)
+
+		ctx.JSON(http.StatusOK, gin.H{"user": user, "sessionId": sessionId})
 	}
 }
 
