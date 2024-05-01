@@ -42,6 +42,10 @@ func (a *API) SetupRouter() *gin.Engine {
 	router.POST("/register", a.hanlderRegister())
 	router.GET("/popular", a.handleGetPopularThisWeek())
 
+	oauthRouter := router.Group("/oauth")
+	oauthRouter.GET("/google", a.handleGoogleOAuth())
+	oauthRouter.POST("/google/exchange", a.handleGoogleOAuthExchange())
+
 	authRouter := router.Group("/").Use(a.AuthMiddleware())
 
 	authRouter.GET("/me", a.handleMe())

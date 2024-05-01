@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -148,6 +151,106 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 
 		response := RegisterResponse{User: user, SessionId: sessionId}
 		ctx.JSON(200, response)
+	}
+}
+
+func (s *API) handleGoogleOAuth() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		clientId, ok := os.LookupEnv("GOOGLE_OAUTH_CLIENT_ID")
+		if !ok {
+			ctx.JSON(400, gin.H{"error": "Missing client id env"})
+			return
+		}
+
+		redirectURL := "http://localhost:3000"
+		authURL := fmt.Sprintf("https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email", clientId, redirectURL)
+
+		ctx.JSON(http.StatusOK, gin.H{"url": authURL})
+	}
+}
+
+type GoogleOAuthExchangePayload struct {
+	Code string `form:"code"`
+}
+
+func (s *API) handleGoogleOAuthExchange() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		req := GoogleOAuthExchangePayload{}
+		if ctx.ShouldBindQuery(&req) != nil {
+			ctx.JSON(400, gin.H{"error": "Missing authorization code"})
+			ctx.Abort()
+			return
+		}
+
+		clientId, ok := os.LookupEnv("GOOGLE_OAUTH_CLIENT_ID")
+		if !ok {
+			ctx.JSON(400, gin.H{"error": "Missing client id env"})
+			return
+		}
+
+		clientSecret, ok := os.LookupEnv("GOOGLE_OAUTH_CLIENT_SECRET")
+		if !ok {
+			ctx.JSON(400, gin.H{"error": "Missing client id env"})
+			return
+		}
+
+		redirectURL := "http://localhost:3000"
+		tokenURL := "https://oauth2.googleapis.com/token"
+		form := url.Values{}
+		form.Set("client_id", clientId)
+		form.Set("client_secret", clientSecret)
+		form.Set("redirect_uri", redirectURL)
+		form.Set("code", req.Code)
+		form.Set("grant_type", "authorization_code")
+		resp, err := http.PostForm(tokenURL, form)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch access token"})
+			return
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
+			return
+		}
+
+		var tokenResponse map[string]interface{}
+		err = json.Unmarshal(body, &tokenResponse)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse access token response body as JSON"})
+			return
+		}
+
+		if tokenResponse["error"] != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": tokenResponse["error"].(string)})
+			return
+		}
+
+		accessToken := tokenResponse["access_token"].(string)
+
+		client := http.Client{}
+		r, err := http.NewRequest(http.MethodGet, "https://www.googleapis.com/oauth2/v3/userinfo", nil)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create userinfo.email request"})
+			return
+		}
+		r.Header.Set("Authorization", "Bearer "+accessToken)
+
+		resp, err = client.Do(r)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch userinfo.email"})
+		}
+		defer resp.Body.Close()
+
+		var userData map[string]interface{}
+		if err := json.NewDecoder(resp.Body).Decode(&userData); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse userinfo response body as JSON"})
+			return
+		}
+
+		// TODO: register user with email if not exist/get user from db and set user session
+		ctx.JSON(http.StatusOK, gin.H{"email": userData["email"].(string)})
 	}
 }
 
