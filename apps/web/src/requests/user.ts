@@ -68,3 +68,31 @@ export const getMyResources = async (limit: number, offset: number, status: stri
 		throw new RequestError(new Error('unexpected error'));
 	}
 };
+
+export const oauthGoogle = async (): Promise<string> => {
+	try {
+		const { data } = await api.get('/oauth/google');
+
+		return data.url;
+	} catch (error) {
+		if (error instanceof Error) {
+			throw new RequestError(error);
+		}
+
+		throw new RequestError(new Error('unexpected error'));
+	}
+}
+
+export const oauthGoogleExchange = async (code: string) => {
+	try {
+		const { data } = await api.post(`/oauth/google/exchange?code=${code}`);
+
+		return data;
+	} catch (error) {
+		if (error instanceof Error) {
+			throw new RequestError(error);
+		}
+
+		throw new RequestError(new Error('unexpected error'));
+	}
+}

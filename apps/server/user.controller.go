@@ -163,7 +163,7 @@ func (s *API) handleGoogleOAuth() gin.HandlerFunc {
 			return
 		}
 
-		redirectURL := "http://localhost:3000"
+		redirectURL := "http://localhost:3000/oauth/google"
 		authURL := fmt.Sprintf("https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email", clientId, redirectURL)
 
 		ctx.JSON(http.StatusOK, gin.H{"url": authURL})
@@ -195,7 +195,7 @@ func (s *API) handleGoogleOAuthExchange() gin.HandlerFunc {
 			return
 		}
 
-		redirectURL := "http://localhost:3000"
+		redirectURL := "http://localhost:3000/oauth/google"
 		tokenURL := "https://oauth2.googleapis.com/token"
 		form := url.Values{}
 		form.Set("client_id", clientId)

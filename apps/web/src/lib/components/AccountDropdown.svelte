@@ -11,7 +11,7 @@
 	import classNames from 'classnames';
 	import { getResourceByURL } from '../../requests/resource';
 	import { api } from '../../api';
-	import { removeQueryParams } from '../../utils';
+	import { deleteCookie, removeQueryParams } from '../../utils';
 
 	type Props = {
 		user: User;
@@ -134,6 +134,10 @@
 				type="button"
 				class="item text-lg text-stone-700 tracking-wide py-1.5 outline-none hover:text-stone-400 focus:text-stone-400 transition duration-75"
 				use:melt={$item}
+				on:click={() => {
+					deleteCookie('sessionId');
+					window.location.reload();
+				}}
 			>
 				Sign out
 			</button>

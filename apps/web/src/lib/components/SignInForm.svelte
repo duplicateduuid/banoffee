@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
+	import { oauthGoogle } from '../../requests/user';
 
 	type Props = {
 		onSignUp: () => void;
@@ -27,9 +28,13 @@
 	<h2 class="font-bold font-primary text-3xl w-full px-8">Welcome back!</h2>
 
 	<div class="flex flex-col gap-2.5 w-full px-8">
+		<!-- TODO: error handling -->
 		<button
 			type="button"
 			class="w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center hover:bg-stone-50 transition"
+			on:click={() => oauthGoogle().then((url) => {
+				window.location.href = url;
+			}).catch(() => {})}
 		>
 			<div class="flex items-center gap-4">
 				<img src="/icons/google.svg" alt="google icon" class="h-6 w-6" />
@@ -37,7 +42,8 @@
 			</div>
 		</button>
 
-		<button
+		<!-- TODO: oauth login with Apple -->
+		<!-- <button
 			type="button"
 			class="w-full rounded-lg py-2.5 font-semibold shadow flex items-center justify-center hover:bg-stone-50 transition"
 		>
@@ -45,7 +51,7 @@
 				<img src="/icons/apple.svg" alt="google icon" class="h-6 w-6" />
 				Sign in with Apple
 			</div>
-		</button>
+		</button> -->
 	</div>
 
 	<div class="relative w-full flex items-center justify-center px-8">
