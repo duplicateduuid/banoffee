@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/redis/go-redis/v9"
+	"github.com/valkey-io/valkey-go"
 )
 
 func newTestRepositories(t *testing.T) Repositories {
@@ -23,16 +23,15 @@ func newTestRepositories(t *testing.T) Repositories {
 
 	userRepo := UserPostgresRepository{db: db}
 	resourceRepo := ResourcePostgresRepository{db: db}
-	redis := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6380",
-		Password: "",
-		DB:       0,
-	})
+	client, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{"127.0.0.1:6379"}})
+	if err != nil {
+		panic(err)
+	}
 
 	return Repositories{
 		userRepository:     userRepo,
 		resourceRepository: resourceRepo,
-		redis:              redis,
+		valkey:             client,
 	}
 }
 
@@ -80,19 +79,20 @@ func (r testRouter) get(path string, params map[string]string) *httptest.Respons
 
 	if r.auth != nil {
 		sessionId := uuid.New().String()
-		// TODO: create redis test instance and add session to it
+		// TODO: create valkey test instance and add session to it
 		req.AddCookie(&http.Cookie{
 			Name:   "sessionId",
 			Value:  sessionId,
 			MaxAge: 3600 * 24,
 		})
 
-		err := r.repos.redis.Set(context.Background(), sessionId, r.auth.Id.String(), 0).Err()
+		valkey := r.repos.valkey
+		err := valkey.Do(context.Background(), valkey.B().Set().Key(sessionId).Value(r.auth.Id.String()).Nx().Build()).Error()
 
 		if err != nil {
-			fmt.Printf("[ERROR] [TestRouter.get] failed to store session on redis: %s\n", err)
+			fmt.Printf("[ERROR] [TestRouter.get] failed to store session on valkey: %s\n", err)
 		}
-		fmt.Printf("[INFO] [TestRouter.get] user id stored on redis: session(%s) => %s\n", sessionId, r.auth.Id)
+		fmt.Printf("[INFO] [TestRouter.get] user id stored on valkey: session(%s) => %s\n", sessionId, r.auth.Id)
 	}
 
 	r.router.ServeHTTP(w, req)
@@ -109,19 +109,20 @@ func (r testRouter) post(path string, payload interface{}) *httptest.ResponseRec
 
 	if r.auth != nil {
 		sessionId := uuid.New().String()
-		// TODO: create redis test instance and add session to it
+		// TODO: create valkey test instance and add session to it
 		req.AddCookie(&http.Cookie{
 			Name:   "sessionId",
 			Value:  sessionId,
 			MaxAge: 3600 * 24,
 		})
 
-		err := r.repos.redis.Set(context.Background(), sessionId, r.auth.Id.String(), 0).Err()
+		valkey := r.repos.valkey
+		err := valkey.Do(context.Background(), valkey.B().Set().Key(sessionId).Value(r.auth.Id.String()).Nx().Build()).Error()
 
 		if err != nil {
-			fmt.Printf("[ERROR] [TestRouter.get] failed to store session on redis: %s\n", err)
+			fmt.Printf("[ERROR] [TestRouter.get] failed to store session on valkey: %s\n", err)
 		}
-		fmt.Printf("[INFO] [TestRouter.get] user id stored on redis: session(%s) => %s\n", sessionId, r.auth.Id)
+		fmt.Printf("[INFO] [TestRouter.get] user id stored on valkey: session(%s) => %s\n", sessionId, r.auth.Id)
 	}
 
 	r.router.ServeHTTP(w, req)

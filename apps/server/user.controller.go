@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
+	"github.com/valkey-io/valkey-go"
 )
 
 type MeResponse struct {
@@ -83,10 +83,10 @@ func (s *API) handleLogin() gin.HandlerFunc {
 			return
 		}
 
-		sessionId, err := login(user, ctx, s.repositories.redis)
+		sessionId, err := login(user, ctx, s.repositories.valkey)
 
 		if err != nil {
-			fmt.Printf("[ERROR] [UserController.login] failed to set redis session: %s\n", err)
+			fmt.Printf("[ERROR] [UserController.login] failed to set valkey session: %s\n", err)
 			ctx.JSON(500, gin.H{"error": "unexpected error"})
 			return
 		}
@@ -142,10 +142,10 @@ func (s *API) hanlderRegister() gin.HandlerFunc {
 			return
 		}
 
-		sessionId, err := login(user, ctx, s.repositories.redis)
+		sessionId, err := login(user, ctx, s.repositories.valkey)
 
 		if err != nil {
-			fmt.Printf("[ERROR] [UserController.login] failed to set redis session: %s\n", err)
+			fmt.Printf("[ERROR] [UserController.login] failed to set valkey session: %s\n", err)
 			ctx.JSON(500, gin.H{"error": "unexpected error"})
 			return
 		}
@@ -264,7 +264,8 @@ func (s *API) handleGoogleOAuthExchange() gin.HandlerFunc {
 
 		sessionId := uuid.New().String()
 
-		err = s.repositories.redis.Set(ctx, sessionId, user.Id.String(), 0).Err()
+		valkey := s.repositories.valkey
+		err = valkey.Do(ctx, valkey.B().Set().Key(sessionId).Value(user.Id.String()).Nx().Build()).Error()
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to set session id"})
 			return
@@ -277,10 +278,10 @@ func (s *API) handleGoogleOAuthExchange() gin.HandlerFunc {
 }
 
 // TODO: move somewhere else
-func login(user *User, ctx *gin.Context, redis *redis.Client) (string, error) {
+func login(user *User, ctx *gin.Context, valkey valkey.Client) (string, error) {
 	sessionId := uuid.New().String()
 
-	err := redis.Set(ctx, sessionId, user.Id.String(), 0).Err()
+	err := valkey.Do(ctx, valkey.B().Set().Key(sessionId).Value(user.Id.String()).Nx().Build()).Error()
 	if err != nil {
 		return "", err
 	}

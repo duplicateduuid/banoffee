@@ -5,14 +5,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/redis/go-redis/v9"
+	"github.com/valkey-io/valkey-go"
 )
 
 type Repositories struct {
 	userRepository     UserRepository
 	resourceRepository ResourceRepository
 	// TODO: replace by an actual repository
-	redis *redis.Client
+	valkey valkey.Client
 }
 
 type UserRepository interface {
@@ -47,17 +47,16 @@ type ResourcePostgresRepository struct {
 func NewRepositories(db *sqlx.DB) Repositories {
 	userRepo := UserPostgresRepository{db: db}
 	resourceRepo := ResourcePostgresRepository{db: db}
-	// TODO: this is bad. write an actual redis repository
-	redis := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
+	// TODO: this is bad. write an actual valkey repository
+	client, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{"127.0.0.1:6379"}})
+	if err != nil {
+		panic(err)
+	}
 
 	return Repositories{
 		userRepository:     userRepo,
 		resourceRepository: resourceRepo,
-		redis:              redis,
+		valkey:             client,
 	}
 }
 

@@ -1,8 +1,8 @@
 services:
-  redis:
-    image: redis
-    container_name: redis
-    command: redis-server
+  valkey:
+    image: valkey/valkey
+    container_name: valkey
+    command: valkey-server
     ports:
       - "6379:6379"
   
@@ -20,10 +20,10 @@ services:
     ports:
       - "5432:5432"
 
-  test_redis:
-    image: redis
-    container_name: redis_testk
-    command: redis-server
+  test_valkey:
+    image: valkey/valkey
+    container_name: valkey_testk
+    command: valkey-server
     ports:
       - "6380:6379"
 

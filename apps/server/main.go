@@ -19,6 +19,8 @@ func main() {
 	db := createDb()
 
 	repositories := NewRepositories(db)
+	defer repositories.valkey.Close()
+
 	api := NewAPI(repositories)
 
 	runSeeder := flag.Bool("seed", false, "run all the seeders")

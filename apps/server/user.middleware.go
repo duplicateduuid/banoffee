@@ -20,10 +20,11 @@ func (a *API) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		userId, err := a.repositories.redis.Get(context.Background(), sessionId).Result()
+		valkey := a.repositories.valkey
+		userId, err := valkey.Do(context.Background(), valkey.B().Get().Key(sessionId).Build()).ToString()
 
 		if err != nil {
-			fmt.Printf("[ERROR] [AuthMiddleware] session(%s) not found on redis: %s\n", sessionId, err)
+			fmt.Printf("[ERROR] [AuthMiddleware] session(%s) not found on valkey: %s\n", sessionId, err)
 			ctx.JSON(401, gin.H{"message": "Unauthorized"})
 			ctx.Abort()
 			return
@@ -39,6 +40,12 @@ func (a *API) AuthMiddleware() gin.HandlerFunc {
 		}
 
 		user, err := a.repositories.userRepository.GetUserById(id)
+		if err != nil {
+			fmt.Printf("[ERROR] [AuthMiddleware] failed to get user by id: %s\n", err)
+			ctx.JSON(401, gin.H{"message": "Unauthorized"})
+			ctx.Abort()
+			return
+		}
 		b, err := json.Marshal(user)
 
 		if err != nil {
