@@ -69,7 +69,7 @@ func (u UserPostgresRepository) GetUserById(id uuid.UUID) (*User, error) {
 	user := new(User)
 	err := u.db.Get(
 		user,
-		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio, u.created_at
+		`SELECT u.id, u.email, u.password, u.username, u.avatar_url, u.header_url, u.bio, u.created_at
 		FROM "user" u WHERE u.id=$1`,
 		id,
 	)
@@ -81,7 +81,7 @@ func (u UserPostgresRepository) GetUserByEmail(email string) (*User, error) {
 	user := new(User)
 	err := u.db.Get(
 		user,
-		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio, u.created_at
+		`SELECT u.id, u.email, u.password, u.username, u.avatar_url, u.header_url, u.bio, u.created_at
 		FROM "user" u WHERE u.email=$1`,
 		email,
 	)
@@ -93,7 +93,7 @@ func (u UserPostgresRepository) GetUserByUsernameOrEmail(usernameOrEmail string)
 	user := new(User)
 	err := u.db.Get(
 		user,
-		`SELECT u.id, u.email, u.username, u.avatar_url, u.header_url, u.bio, u.created_at
+		`SELECT u.id, u.email, u.password, u.username, u.avatar_url, u.header_url, u.bio, u.created_at
 		 FROM "user" u 
 		 WHERE u.email=$1 OR u.username=$1`,
 		usernameOrEmail,

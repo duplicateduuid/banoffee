@@ -10,7 +10,7 @@ import (
 type User struct {
 	Id                uuid.UUID `db:"id" json:"id" tstype:"string"`
 	Email             string    `db:"email" json:"email" tstype:"string"`
-	EncryptedPassword string    `json:"-" tstype:"string"`
+	EncryptedPassword string    `db:"password" json:"-" tstype:"string"`
 	Username          string    `db:"username" json:"username" tstype:"string"`
 	AvatarUrl         *string   `db:"avatar_url" json:"avatar_url" tstype:"string | null"`
 	HeaderUrl         *string   `db:"header_url" json:"header_url" tstype:"string | null"`
@@ -32,7 +32,7 @@ type Resource struct {
 }
 
 func (u *User) ValidPassword(password string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(password)) == nil
+	return bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(password)) != nil
 }
 
 func NewUser(email string, username string, password string, avatarUrl *string, headerUrl *string, bio *string) (*User, error) {
